@@ -28,3 +28,10 @@
 2025-04-12 13:26:46,092 - DEBUG - Updated balance to $30.00
 2025-04-12 13:26:46,092 - DEBUG - Cleared input fields
 2025-04-12 13:26:47,464 - INFO - Transaction edited at index None
+2025-04-12 13:28:44,125 - DEBUG - TransactionManager initialized
+2025-04-12 13:28:44,131 - DEBUG - GUI setup completed
+2025-04-12 13:28:44,131 - INFO - No transaction file found, starting with empty list
+2025-04-12 13:28:44,131 - DEBUG - Transaction display updated
+2025-04-12 13:28:44,131 - DEBUG - Updated balance to $0.00
+2025-04-12 13:28:44,131 - DEBUG - Transactions loaded and displayed
+2025-04-12 13:28:44,131 - DEBUG - TransactionGUI initialized
