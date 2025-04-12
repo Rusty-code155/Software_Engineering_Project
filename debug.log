@@ -1,0 +1,30 @@
+2025-04-12 13:26:11,004 - DEBUG - TransactionManager initialized
+2025-04-12 13:26:11,014 - DEBUG - GUI setup completed
+2025-04-12 13:26:11,014 - INFO - No transaction file found, starting with empty list
+2025-04-12 13:26:11,014 - DEBUG - Transaction display updated
+2025-04-12 13:26:11,015 - DEBUG - Updated balance to $0.00
+2025-04-12 13:26:11,015 - DEBUG - Transactions loaded and displayed
+2025-04-12 13:26:11,015 - DEBUG - TransactionGUI initialized
+2025-04-12 13:26:35,200 - DEBUG - Validated transaction: description=Test_1, amount=20.0, category=Deposit
+2025-04-12 13:26:35,200 - DEBUG - Saved 1 transactions to file
+2025-04-12 13:26:35,200 - INFO - Added transaction: {'Description': 'Test_1', 'Amount': 20.0, 'Category': 'Deposit', 'Date': '2025-04-12 13:26:35'}
+2025-04-12 13:26:35,200 - DEBUG - Transaction display updated
+2025-04-12 13:26:35,200 - DEBUG - Updated balance to $20.00
+2025-04-12 13:26:35,200 - DEBUG - Cleared input fields
+2025-04-12 13:26:36,659 - INFO - Transaction added via GUI
+2025-04-12 13:26:37,756 - DEBUG - Selected transaction at index 0: ('Test_1', '20.0', 'Deposit', '2025-04-12 13:26:35')
+2025-04-12 13:26:38,908 - DEBUG - Validated transaction: description=Test_1, amount=20.0, category=Deposit
+2025-04-12 13:26:38,920 - DEBUG - Saved 1 transactions to file
+2025-04-12 13:26:38,920 - INFO - Edited transaction at index 0: {'Description': 'Test_1', 'Amount': 20.0, 'Category': 'Deposit', 'Date': '2025-04-12 13:26:38'}
+2025-04-12 13:26:38,920 - DEBUG - Transaction display updated
+2025-04-12 13:26:38,922 - DEBUG - Updated balance to $20.00
+2025-04-12 13:26:38,922 - DEBUG - Cleared input fields
+2025-04-12 13:26:40,523 - INFO - Transaction edited at index None
+2025-04-12 13:26:41,473 - DEBUG - Selected transaction at index 0: ('Test_1', '20.0', 'Deposit', '2025-04-12 13:26:38')
+2025-04-12 13:26:46,074 - DEBUG - Validated transaction: description=Test_1, amount=30.0, category=Deposit
+2025-04-12 13:26:46,090 - DEBUG - Saved 1 transactions to file
+2025-04-12 13:26:46,090 - INFO - Edited transaction at index 0: {'Description': 'Test_1', 'Amount': 30.0, 'Category': 'Deposit', 'Date': '2025-04-12 13:26:46'}
+2025-04-12 13:26:46,090 - DEBUG - Transaction display updated
+2025-04-12 13:26:46,092 - DEBUG - Updated balance to $30.00
+2025-04-12 13:26:46,092 - DEBUG - Cleared input fields
+2025-04-12 13:26:47,464 - INFO - Transaction edited at index None
