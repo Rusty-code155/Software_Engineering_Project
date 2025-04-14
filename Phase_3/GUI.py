@@ -1,15 +1,14 @@
 #Code by Turner Miles Peeples
-# GUI.py
 import tkinter as tk
 from tkinter import messagebox, ttk
 import logging
 from log import TransactionManager
 
-# Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
+    handlers=
+    [
         logging.FileHandler('debug.log'),
         logging.StreamHandler()
     ]
@@ -70,7 +69,7 @@ class TransactionGUI:
             self.form_frame, textvariable=self.category_var, values=self.manager.get_categories(), state="readonly"
         )
         self.category_dropdown.grid(row=2, column=1, padx=10, pady=5)
-        self.category_dropdown.set(self.manager.get_categories()[0])  # Default to first category
+        self.category_dropdown.set(self.manager.get_categories()[0])
 
         # Buttons
         self.button_frame = tk.Frame(self.main_content, bg="#ffffff")

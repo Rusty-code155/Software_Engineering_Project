@@ -1,27 +1,23 @@
 #Code by Turner Miles Peeples
-
-# log.py
 import logging
 from datetime import datetime
-
-# Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
+    handlers=
+    [
         logging.FileHandler('debug.log'),
         logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
-
 class TransactionManager:
     def __init__(self):
         self.transactions = []
-        self.categories = ["Invoice", "Deposit", "Expense", "Income"]  # Placeholder categories from PDF
+        self.categories = ["Invoice", "Deposit", "Expense", "Income"]
         self.file_path = "transactions.txt"
         logger.debug("TransactionManager initialized")
-
+        
     def validate_transaction(self, description, amount, category):
         """Validate transaction data before adding or editing."""
         if not description:
@@ -51,7 +47,7 @@ class TransactionManager:
         except Exception as e:
             logger.error(f"Error adding transaction: {e}")
             raise
-
+        
     def edit_transaction(self, index, description, amount, category):
         """Edit an existing transaction."""
         try:
@@ -103,12 +99,13 @@ class TransactionManager:
                         if category not in self.categories:
                             logger.warning(f"Invalid category '{category}' in file, setting to 'Expense'")
                             category = "Expense"
-                        self.transactions.append({
+                        self.transactions.append(
+                            {
                             "Description": description,
                             "Amount": amount,
                             "Category": category,
                             "Date": date
-                        })
+                            })
                     except (IndexError, ValueError) as e:
                         logger.warning(f"Error parsing line '{line.strip()}': {e}")
                         continue
