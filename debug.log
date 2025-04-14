@@ -35,3 +35,10 @@
 2025-04-12 13:28:44,131 - DEBUG - Updated balance to $0.00
 2025-04-12 13:28:44,131 - DEBUG - Transactions loaded and displayed
 2025-04-12 13:28:44,131 - DEBUG - TransactionGUI initialized
+2025-04-13 21:46:47,157 - DEBUG - TransactionManager initialized
+2025-04-13 21:46:47,172 - DEBUG - GUI setup completed
+2025-04-13 21:46:47,172 - INFO - No transaction file found, starting with empty list
+2025-04-13 21:46:47,172 - DEBUG - Transaction display updated
+2025-04-13 21:46:47,172 - DEBUG - Updated balance to $0.00
+2025-04-13 21:46:47,172 - DEBUG - Transactions loaded and displayed
+2025-04-13 21:46:47,172 - DEBUG - TransactionGUI initialized
