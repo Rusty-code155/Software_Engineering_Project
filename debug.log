@@ -42,3 +42,58 @@
 2025-04-13 21:46:47,172 - DEBUG - Updated balance to $0.00
 2025-04-13 21:46:47,172 - DEBUG - Transactions loaded and displayed
 2025-04-13 21:46:47,172 - DEBUG - TransactionGUI initialized
+2025-04-20 23:24:29,901 - DEBUG - matplotlib data path: C:\Users\PEEPLET\OneDrive - University of South Carolina Aiken\Documents\Software Engineering\Software_Engineering_Project\.venv\Lib\site-packages\matplotlib\mpl-data
+2025-04-20 23:24:29,955 - DEBUG - CONFIGDIR=C:\Users\PEEPLET\.matplotlib
+2025-04-20 23:24:29,955 - DEBUG - interactive is False
+2025-04-20 23:24:29,955 - DEBUG - platform is win32
+2025-04-20 23:24:30,049 - DEBUG - CACHEDIR=C:\Users\PEEPLET\.matplotlib
+2025-04-20 23:24:30,071 - DEBUG - Using fontManager instance from C:\Users\PEEPLET\.matplotlib\fontlist-v390.json
+2025-04-20 23:41:44,596 - DEBUG - matplotlib data path: C:\Users\PEEPLET\OneDrive - University of South Carolina Aiken\Documents\Software Engineering\Software_Engineering_Project\.venv\Lib\site-packages\matplotlib\mpl-data
+2025-04-20 23:41:44,644 - DEBUG - CONFIGDIR=C:\Users\PEEPLET\.matplotlib
+2025-04-20 23:41:44,644 - DEBUG - interactive is False
+2025-04-20 23:41:44,649 - DEBUG - platform is win32
+2025-04-20 23:41:45,061 - DEBUG - CACHEDIR=C:\Users\PEEPLET\.matplotlib
+2025-04-20 23:41:45,089 - DEBUG - Using fontManager instance from C:\Users\PEEPLET\.matplotlib\fontlist-v390.json
+2025-04-20 23:41:47,841 - DEBUG - TransactionManager initialized
+2025-04-20 23:41:47,841 - DEBUG - AccountManager initialized
+2025-04-20 23:41:47,841 - DEBUG - CalendarManager initialized
+2025-04-20 23:41:47,841 - DEBUG - WalletManager initialized
+2025-04-20 23:41:47,849 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-20 23:41:47,849 - DEBUG - StatsManager initialized
+2025-04-20 23:41:47,849 - DEBUG - Styles configured for theme: Default
+2025-04-20 23:41:47,881 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-20 23:41:47,881 - DEBUG - Summary - Income: 0, Expenses: 0, Net: 0
+2025-04-20 23:41:47,881 - DEBUG - Retrieved cards
+2025-04-20 23:41:47,883 - DEBUG - Updated dashboard
+2025-04-20 23:41:47,883 - DEBUG - TransactionGUI initialized
+2025-04-20 23:41:50,039 - ERROR - Error updating transaction lists: 'TransactionGUI' object has no attribute 'tree_all_frame'
+2025-04-20 23:42:15,589 - DEBUG - Retrieved account details
+2025-04-20 23:42:15,589 - DEBUG - Retrieved cards
+2025-04-20 23:42:15,589 - DEBUG - Loaded account details
+2025-04-20 23:42:17,161 - ERROR - Error generating pie chart: No transaction data
+2025-04-20 23:42:19,975 - ERROR - Error updating calendar: bad window path name ".!frame2.!frame5.!notebook.!frame.!treeview"
+2025-04-20 23:42:21,517 - DEBUG - Retrieved upcoming payments: 0
+2025-04-20 23:42:21,517 - DEBUG - Retrieved upcoming appointments: 0
+2025-04-20 23:42:21,517 - DEBUG - Updated notifications
+2025-04-20 23:42:22,323 - DEBUG - Retrieved cards
+2025-04-20 23:42:22,323 - DEBUG - Updated wallet display
+2025-04-20 23:42:23,645 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-20 23:42:58,195 - DEBUG - Styles configured for theme: Dark
+2025-04-20 23:42:58,195 - DEBUG - Applied theme: Dark
+2025-04-20 23:42:58,195 - INFO - Changed theme to Dark
+2025-04-20 23:43:11,112 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-20 23:57:30,187 - DEBUG - Retrieved cards
+2025-04-20 23:57:30,187 - DEBUG - Updated wallet display
+2025-04-20 23:57:38,706 - DEBUG - Retrieved upcoming payments: 0
+2025-04-20 23:57:38,708 - DEBUG - Retrieved upcoming appointments: 0
+2025-04-20 23:57:38,708 - DEBUG - Updated notifications
+2025-04-20 23:57:42,098 - ERROR - Error updating calendar: bad window path name ".!frame2.!frame16.!notebook.!frame.!treeview"
+2025-04-20 23:57:53,615 - ERROR - Error generating pie chart: No transaction data
+2025-04-20 23:57:55,586 - DEBUG - Retrieved account details
+2025-04-20 23:57:55,586 - DEBUG - Retrieved cards
+2025-04-20 23:57:55,586 - DEBUG - Loaded account details
+2025-04-20 23:58:02,632 - ERROR - Error updating transaction lists: 'TransactionGUI' object has no attribute 'tree_all_frame'
+2025-04-20 23:58:14,873 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-20 23:58:14,883 - DEBUG - Summary - Income: 0, Expenses: 0, Net: 0
+2025-04-20 23:58:14,883 - DEBUG - Retrieved cards
+2025-04-20 23:58:14,883 - DEBUG - Updated dashboard
