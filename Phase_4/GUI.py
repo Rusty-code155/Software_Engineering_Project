@@ -1,5 +1,6 @@
 # Written by: Turner Miles Peeples
 
+
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog, colorchooser
 from PIL import Image, ImageTk
@@ -275,24 +276,50 @@ class TransactionGUI:
 
         tk.Button(filter_frame, text="Apply Filters", command=self.update_transaction_lists, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
 
-        # Transaction Lists
-        for frame, category in [
-            (self.all_frame, None),
-            (self.invoices_frame, "Invoice"),
-            (self.deposits_frame, "Deposit"),
-            (self.transfers_frame, "Transfer")
-        ]:
-            tree = ttk.Treeview(
-                frame, columns=("Amount", "Status", "Recipient", "Date", "PaymentMethod"), show="headings"
-            )
-            tree.heading("Amount", text="Amount")
-            tree.heading("Status", text="Status")
-            tree.heading("Recipient", text="Recipient")
-            tree.heading("Date", text="Date")
-            tree.heading("PaymentMethod", text="Payment Method")
-            tree.pack(expand=True, fill="both", padx=10, pady=5)
-            tree.bind("<<TreeviewSelect>>", lambda e, f=frame: self.select_transaction(e, f))
-            setattr(self, f"tree_{frame.winfo_name()}", tree)
+        # Transaction Lists with explicit attribute names
+        self.tree_all = ttk.Treeview(
+            self.all_frame, columns=("Amount", "Status", "Recipient", "Date", "PaymentMethod"), show="headings"
+        )
+        self.tree_all.heading("Amount", text="Amount")
+        self.tree_all.heading("Status", text="Status")
+        self.tree_all.heading("Recipient", text="Recipient")
+        self.tree_all.heading("Date", text="Date")
+        self.tree_all.heading("PaymentMethod", text="Payment Method")
+        self.tree_all.pack(expand=True, fill="both", padx=10, pady=5)
+        self.tree_all.bind("<<TreeviewSelect>>", lambda e: self.select_transaction(e, self.all_frame))
+
+        self.tree_invoices = ttk.Treeview(
+            self.invoices_frame, columns=("Amount", "Status", "Recipient", "Date", "PaymentMethod"), show="headings"
+        )
+        self.tree_invoices.heading("Amount", text="Amount")
+        self.tree_invoices.heading("Status", text="Status")
+        self.tree_invoices.heading("Recipient", text="Recipient")
+        self.tree_invoices.heading("Date", text="Date")
+        self.tree_invoices.heading("PaymentMethod", text="Payment Method")
+        self.tree_invoices.pack(expand=True, fill="both", padx=10, pady=5)
+        self.tree_invoices.bind("<<TreeviewSelect>>", lambda e: self.select_transaction(e, self.invoices_frame))
+
+        self.tree_deposits = ttk.Treeview(
+            self.deposits_frame, columns=("Amount", "Status", "Recipient", "Date", "PaymentMethod"), show="headings"
+        )
+        self.tree_deposits.heading("Amount", text="Amount")
+        self.tree_deposits.heading("Status", text="Status")
+        self.tree_deposits.heading("Recipient", text="Recipient")
+        self.tree_deposits.heading("Date", text="Date")
+        self.tree_deposits.heading("PaymentMethod", text="Payment Method")
+        self.tree_deposits.pack(expand=True, fill="both", padx=10, pady=5)
+        self.tree_deposits.bind("<<TreeviewSelect>>", lambda e: self.select_transaction(e, self.deposits_frame))
+
+        self.tree_transfers = ttk.Treeview(
+            self.transfers_frame, columns=("Amount", "Status", "Recipient", "Date", "PaymentMethod"), show="headings"
+        )
+        self.tree_transfers.heading("Amount", text="Amount")
+        self.tree_transfers.heading("Status", text="Status")
+        self.tree_transfers.heading("Recipient", text="Recipient")
+        self.tree_transfers.heading("Date", text="Date")
+        self.tree_transfers.heading("PaymentMethod", text="Payment Method")
+        self.tree_transfers.pack(expand=True, fill="both", padx=10, pady=5)
+        self.tree_transfers.bind("<<TreeviewSelect>>", lambda e: self.select_transaction(e, self.transfers_frame))
 
         self.update_transaction_lists()
 
@@ -371,8 +398,11 @@ class TransactionGUI:
         control_frame = tk.Frame(self.pie_frame, bg=self.themes[self.current_theme]["content_bg"])
         control_frame.pack(fill="x", pady=5)
         tk.Button(control_frame, text="Change Colors", command=self.change_pie_colors, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
-        self.pie_canvas, self.pie_fig = self.stats_manager.get_pie_chart(self.pie_frame, colors=self.pie_colors)
-        self.pie_canvas.get_tk_widget().pack(expand=True, fill="both")
+        try:
+            self.pie_canvas, self.pie_fig = self.stats_manager.get_pie_chart(self.pie_frame, colors=self.pie_colors)
+            self.pie_canvas.get_tk_widget().pack(expand=True, fill="both")
+        except ValueError as e:
+            tk.Label(self.pie_frame, text="No transaction data available", font=("Arial", 12)).pack(expand=True, fill="both")
 
         # Bar Graph
         control_frame = tk.Frame(self.bar_frame, bg=self.themes[self.current_theme]["content_bg"])
@@ -380,8 +410,11 @@ class TransactionGUI:
         tk.Button(control_frame, text="Change Color", command=self.change_bar_color, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
         tk.Button(control_frame, text="Zoom In", command=lambda: self.zoom_graph("bar", 1.2), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
         tk.Button(control_frame, text="Zoom Out", command=lambda: self.zoom_graph("bar", 0.8), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
-        self.bar_canvas, self.bar_fig = self.stats_manager.get_bar_chart(self.bar_frame, color=self.bar_color, zoom=self.zoom_levels["bar"])
-        self.bar_canvas.get_tk_widget().pack(expand=True, fill="both")
+        try:
+            self.bar_canvas, self.bar_fig = self.stats_manager.get_bar_chart(self.bar_frame, color=self.bar_color, zoom=self.zoom_levels["bar"])
+            self.bar_canvas.get_tk_widget().pack(expand=True, fill="both")
+        except ValueError as e:
+            tk.Label(self.bar_frame, text="No transaction data available", font=("Arial", 12)).pack(expand=True, fill="both")
 
         # Scatter Plot
         control_frame = tk.Frame(self.scatter_frame, bg=self.themes[self.current_theme]["content_bg"])
@@ -390,8 +423,11 @@ class TransactionGUI:
         tk.Button(control_frame, text="Change Line Color", command=self.change_scatter_line_color, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
         tk.Button(control_frame, text="Zoom In", command=lambda: self.zoom_graph("scatter", 1.2), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
         tk.Button(control_frame, text="Zoom Out", command=lambda: self.zoom_graph("scatter", 0.8), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
-        self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
-        self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
+        try:
+            self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
+            self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
+        except ValueError as e:
+            tk.Label(self.scatter_frame, text="No transaction data available", font=("Arial", 12)).pack(expand=True, fill="both")
 
         # Line Graph
         control_frame = tk.Frame(self.line_frame, bg=self.themes[self.current_theme]["content_bg"])
@@ -399,8 +435,11 @@ class TransactionGUI:
         tk.Button(control_frame, text="Change Color", command=self.change_line_color, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
         tk.Button(control_frame, text="Zoom In", command=lambda: self.zoom_graph("line", 1.2), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
         tk.Button(control_frame, text="Zoom Out", command=lambda: self.zoom_graph("line", 0.8), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
-        self.line_canvas, self.line_fig = self.stats_manager.get_line_graph(self.line_frame, color=self.line_color, zoom=self.zoom_levels["line"])
-        self.line_canvas.get_tk_widget().pack(expand=True, fill="both")
+        try:
+            self.line_canvas, self.line_fig = self.stats_manager.get_line_graph(self.line_frame, color=self.line_color, zoom=self.zoom_levels["line"])
+            self.line_canvas.get_tk_widget().pack(expand=True, fill="both")
+        except ValueError as e:
+            tk.Label(self.line_frame, text="No transaction data available", font=("Arial", 12)).pack(expand=True, fill="both")
 
         tk.Label(self.recipient_frame, text="Recipient Percentages:", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
         self.recipient_text = tk.Text(self.recipient_frame, height=5)
@@ -511,47 +550,47 @@ class TransactionGUI:
 
         # Planned Payment Form
         tk.Label(self.planned_frame, text="Add Planned Payment", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
-        form = tk.Frame(self.planned_frame, bg=self.themes[self.current_theme]["content_bg"])
-        form.pack(fill="x", padx=10)
-        tk.Label(form, text="Amount:").grid(row=0, column=0, padx=5, pady=5)
-        self.entry_plan_amount = tk.Entry(form)
+        self.planned_form = tk.Frame(self.planned_frame, bg=self.themes[self.current_theme]["content_bg"])
+        self.planned_form.pack(fill="x", padx=10)
+        tk.Label(self.planned_form, text="Amount:").grid(row=0, column=0, padx=5, pady=5)
+        self.entry_plan_amount = tk.Entry(self.planned_form)
         self.entry_plan_amount.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        tk.Label(form, text="Date (YYYY-MM-DD):").grid(row=1, column=0, padx=5, pady=5)
-        self.entry_plan_date = tk.Entry(form)
+        tk.Label(self.planned_form, text="Date (YYYY-MM-DD):").grid(row=1, column=0, padx=5, pady=5)
+        self.entry_plan_date = tk.Entry(self.planned_form)
         self.entry_plan_date.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
-        tk.Label(form, text="Recipient:").grid(row=2, column=0, padx=5, pady=5)
-        self.entry_plan_recipient = tk.Entry(form)
+        tk.Label(self.planned_form, text="Recipient:").grid(row=2, column=0, padx=5, pady=5)
+        self.entry_plan_recipient = tk.Entry(self.planned_form)
         self.entry_plan_recipient.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
 
-        tk.Label(form, text="Payment Method:").grid(row=3, column=0, padx=5, pady=5)
+        tk.Label(self.planned_form, text="Payment Method:").grid(row=3, column=0, padx=5, pady=5)
         self.plan_payment_var = tk.StringVar()
         self.plan_payment_dropdown = ttk.Combobox(
-            form, textvariable=self.plan_payment_var, values=self.transaction_manager.get_payment_methods(), state="readonly"
+            self.planned_form, textvariable=self.plan_payment_var, values=self.transaction_manager.get_payment_methods(), state="readonly"
         )
         self.plan_payment_dropdown.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
         self.plan_payment_dropdown.set(self.transaction_manager.get_payment_methods()[0])
 
-        tk.Button(form, text="Add Planned Payment", command=self.add_planned_payment, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).grid(row=4, column=0, columnspan=2, pady=5)
+        tk.Button(self.planned_form, text="Add Planned Payment", command=self.add_planned_payment, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).grid(row=4, column=0, columnspan=2, pady=5)
 
         # Appointment Form
         tk.Label(self.appointments_frame, text="Add Appointment", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
-        appt_form = tk.Frame(self.appointments_frame, bg=self.themes[self.current_theme]["content_bg"])
-        appt_form.pack(fill="x", padx=10)
-        tk.Label(appt_form, text="Title:").grid(row=0, column=0, padx=5, pady=5)
-        self.entry_appointment_title = tk.Entry(appt_form)
+        self.appointment_form = tk.Frame(self.appointments_frame, bg=self.themes[self.current_theme]["content_bg"])
+        self.appointment_form.pack(fill="x", padx=10)
+        tk.Label(self.appointment_form, text="Title:").grid(row=0, column=0, padx=5, pady=5)
+        self.entry_appointment_title = tk.Entry(self.appointment_form)
         self.entry_appointment_title.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        tk.Label(appt_form, text="Date (YYYY-MM-DD):").grid(row=1, column=0, padx=5, pady=5)
-        self.entry_appointment_date = tk.Entry(appt_form)
+        tk.Label(self.appointment_form, text="Date (YYYY-MM-DD):").grid(row=1, column=0, padx=5, pady=5)
+        self.entry_appointment_date = tk.Entry(self.appointment_form)
         self.entry_appointment_date.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
-        tk.Label(appt_form, text="Time (HH:MM):").grid(row=2, column=0, padx=5, pady=5)
-        self.entry_appointment_time = tk.Entry(appt_form)
+        tk.Label(self.appointment_form, text="Time (HH:MM):").grid(row=2, column=0, padx=5, pady=5)
+        self.entry_appointment_time = tk.Entry(self.appointment_form)
         self.entry_appointment_time.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
 
-        tk.Button(appt_form, text="Add Appointment", command=self.add_appointment, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).grid(row=3, column=0, columnspan=2, pady=5)
+        tk.Button(self.appointment_form, text="Add Appointment", command=self.add_appointment, bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).grid(row=3, column=0, columnspan=2, pady=5)
 
         self.update_calendar()
 
@@ -633,13 +672,6 @@ class TransactionGUI:
         tk.Label(frame, text="Profile", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
         tk.Label(frame, text="Edit profile settings (Placeholder)", font=("Arial", 10)).pack(anchor="w", padx=10)
 
-    def change_theme(self):
-        new_theme = self.theme_var.get()
-        if new_theme != self.current_theme:
-            self.current_theme = new_theme
-            self.apply_theme()
-            logger.info(f"Changed theme to {self.current_theme}")
-
     def setup_payment(self):
         frame = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
         frame.pack(expand=True, fill="both", padx=20, pady=20)
@@ -649,70 +681,78 @@ class TransactionGUI:
         # Current Subscription
         sub_frame = tk.Frame(frame, bg=self.themes[self.current_theme]["button_bg"], relief="raised", bd=2)
         sub_frame.pack(fill="x", pady=10)
-        tk.Label(sub_frame, text="Current Subscription Plan", font=("Arial", 12), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(anchor="w", padx=10, pady=5)
-        tk.Label(sub_frame, text="$25.00", font=("Arial", 16, "bold"), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(anchor="w", padx=10)
-        tk.Label(sub_frame, text="Company Plus", font=("Arial", 10), bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(anchor="w", padx=10)
-        tk.Button(sub_frame, text="Change Plan", command=lambda: messagebox.showinfo("Info", "Change plan functionality not implemented"), bg=self.themes[self.current_theme]["content_bg"], fg=self.themes[self.current_theme]["button_bg"]).pack(anchor="w", padx=10, pady=5)
+        tk.Label(sub_frame, text="Current Subscription Plan", font=("Arial", 12, "bold"), 
+                 bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(pady=5)
+        self.plan_label = tk.Label(sub_frame, text="Free Plan", font=("Arial", 10), 
+                                   bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"])
+        self.plan_label.pack()
 
-        # Next Payment
-        tk.Label(frame, text="Next Payment", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
-        tk.Label(frame, text="$50.00 on May 15, 2025", font=("Arial", 10)).pack(anchor="w", padx=10)
+        # Billing Information Form
+        tk.Label(frame, text="Update Billing Information", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
+        billing_form = tk.Frame(frame, bg=self.themes[self.current_theme]["content_bg"])
+        billing_form.pack(fill="x", padx=10)
 
-        # Payment History
-        tk.Label(frame, text="Payment History", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
-        payment_tree = ttk.Treeview(frame, columns=("Amount", "Status", "Recipient", "Date", "PaymentMethod"), show="headings")
-        payment_tree.heading("Amount", text="Amount")
-        payment_tree.heading("Status", text="Status")
-        payment_tree.heading("Recipient", text="Recipient")
-        payment_tree.heading("Date", text="Date")
-        payment_tree.heading("PaymentMethod", text="Payment Method")
-        payment_tree.pack(fill="x", padx=10, pady=5)
-        for t in sorted(self.transaction_manager.get_transactions(), key=lambda x: x["Date"], reverse=True)[:3]:
-            payment_tree.insert("", "end", values=(
-                f"${t['Amount']:.2f}", t["Status"], t["Recipient"], t["Date"], t["PaymentMethod"]
-            ))
+        tk.Label(billing_form, text="Card Number:").grid(row=0, column=0, padx=5, pady=5)
+        self.entry_billing_card = tk.Entry(billing_form)
+        self.entry_billing_card.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-    def update_balance(self):
-        try:
-            balance = sum(t["Amount"] for t in self.transaction_manager.get_transactions())
-            self.balance_value.config(text=f"${balance:,.2f}")
-            logger.debug(f"Updated balance: ${balance:,.2f}")
-        except Exception as e:
-            logger.error(f"Error updating balance: {e}")
+        tk.Label(billing_form, text="Expiration Date (MM/YY):").grid(row=1, column=0, padx=5, pady=5)
+        self.entry_billing_expiry = tk.Entry(billing_form)
+        self.entry_billing_expiry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+
+        tk.Label(billing_form, text="CVV:").grid(row=2, column=0, padx=5, pady=5)
+        self.entry_billing_cvv = tk.Entry(billing_form)
+        self.entry_billing_cvv.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+
+        tk.Label(billing_form, text="Billing Address:").grid(row=3, column=0, padx=5, pady=5)
+        self.entry_billing_address = tk.Entry(billing_form)
+        self.entry_billing_address.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
+
+        # Buttons
+        btn_frame = tk.Frame(billing_form, bg=self.themes[self.current_theme]["content_bg"])
+        btn_frame.grid(row=4, column=0, columnspan=2, pady=10)
+        tk.Button(btn_frame, text="Change Plan", command=self.change_plan, 
+                  bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
+        tk.Button(btn_frame, text="Update Billing", command=self.update_billing, 
+                  bg=self.themes[self.current_theme]["button_bg"], fg=self.themes[self.current_theme]["button_fg"]).pack(side="left", padx=5)
+
+    def change_plan(self):
+        messagebox.showinfo("Info", "Change plan functionality not implemented")
+        logger.debug("Attempted to change plan (not implemented)")
+
+    def update_billing(self):
+        messagebox.showinfo("Info", "Billing information updated (Placeholder)")
+        logger.debug("Updated billing information (placeholder)")
+
+    def change_theme(self):
+        new_theme = self.theme_var.get()
+        if new_theme != self.current_theme:
+            self.current_theme = new_theme
+            self.apply_theme()
+            logger.info(f"Changed theme to {self.current_theme}")
 
     def update_dashboard(self):
-        try:
-            for row in self.recent_payments.get_children():
-                self.recent_payments.delete(row)
-            recent = sorted(
-                self.transaction_manager.get_transactions(),
-                key=lambda x: x["Date"],
-                reverse=True
-            )[:3]
-            for t in recent:
-                self.recent_payments.insert("", "end", values=(f"${t['Amount']:.2f}", t["Recipient"], t["Date"]))
+        transactions = self.transaction_manager.get_transactions()
+        income = sum(t["Amount"] for t in transactions if t["Category"] == "Deposit")
+        expenses = sum(t["Amount"] for t in transactions if t["Category"] in ["Invoice", "Transfer"])
+        net = income - expenses
+        self.balance_value.config(text=f"${net:.2f}")
+        self.summary_label.config(text=f"Income: ${income:.2f} | Expenses: ${expenses:.2f} | Net: ${net:.2f}")
+        logger.debug(f"Summary - Income: {income}, Expenses: {expenses}, Net: {net}")
 
-            summary = self.transaction_manager.get_summary()
-            self.summary_label.config(
-                text=f"Income: ${summary['income']:,.2f} | Expenses: ${summary['expenses']:,.2f} | Net: ${summary['net']:,.2f}"
-            )
+        for row in self.recent_payments.get_children():
+            self.recent_payments.delete(row)
+        for t in transactions[-3:]:  # Last 3 transactions
+            self.recent_payments.insert("", "end", values=(
+                f"${t['Amount']:.2f}", t["Recipient"], t["Date"]
+            ))
 
-            for widget in self.wallet_preview.winfo_children():
-                widget.destroy()
-            cards = self.wallet_manager.get_cards()
-            if cards:
-                main_card = cards[-1]
-                card_frame = tk.Frame(self.wallet_preview, bg="#000000", relief="raised", bd=2)
-                card_frame.pack(fill="x", pady=5)
-                tk.Label(card_frame, text=f"{main_card['Type']} ending in {main_card['Number'][-4:]}", font=("Arial", 10), bg="#000000", fg="#ffffff").pack(pady=5)
-                for card in reversed(cards[:-1][:3]):
-                    card_frame = tk.Frame(self.wallet_preview, bg="#000000", relief="sunken", bd=1)
-                    card_frame.pack(fill="x", pady=2)
-                    tk.Label(card_frame, text=f"{card['Type']} ending in {card['Number'][-4:]}", font=("Arial", 8), bg="#000000", fg="#ffffff").pack()
-
-            logger.debug("Updated dashboard")
-        except Exception as e:
-            logger.error(f"Error updating dashboard: {e}")
+        for widget in self.wallet_preview.winfo_children():
+            widget.destroy()
+        cards = self.wallet_manager.get_cards()
+        for card in cards[:2]:  # Show up to 2 cards
+            tk.Label(self.wallet_preview, text=f"{card['Type']}: {card['Number'][-4:]}", font=("Arial", 10)).pack(anchor="w")
+        logger.debug("Updated dashboard")
 
     def update_transaction_lists(self, event=None):
         try:
@@ -724,10 +764,10 @@ class TransactionGUI:
             if not start_date or not end_date:
                 start_date = end_date = None
             trees = [
-                (self.tree_all_frame, category_filter, type_filter),
-                (self.tree_invoices_frame, "Invoice", None),
-                (self.tree_deposits_frame, "Deposit", None),
-                (self.tree_transfers_frame, "Transfer", None)
+                (self.tree_all, category_filter, type_filter),
+                (self.tree_invoices, "Invoice", None),
+                (self.tree_deposits, "Deposit", None),
+                (self.tree_transfers, "Transfer", None)
             ]
             for tree, cat, t_type in trees:
                 for row in tree.get_children():
@@ -744,78 +784,16 @@ class TransactionGUI:
             logger.error(f"Error updating transaction lists: {e}")
             messagebox.showerror("Error", str(e))
 
-    def add_transaction(self):
-        try:
-            description = self.entry_description.get().strip()
-            amount = self.entry_amount.get().strip()
-            category = self.category_var.get()
-            recipient = self.entry_recipient.get().strip()
-            payment_method = self.payment_var.get()
-            status = self.status_var.get()
-            if not amount.replace(".", "", 1).isdigit():
-                raise ValueError("Amount must be a valid number")
-            amount = float(amount)
-            self.transaction_manager.add_transaction(description, amount, category, recipient, payment_method, status)
-            self.update_transaction_lists()
-            self.update_balance()
-            self.update_dashboard()
-            self.stats_manager.update_transactions(self.transaction_manager.get_transactions())
-            self.clear_transaction_form()
-            messagebox.showinfo("Success", "Transaction added!")
-            logger.info("Transaction added")
-        except Exception as e:
-            logger.error(f"Error adding transaction: {e}")
-            messagebox.showerror("Error", str(e))
-
-    def edit_transaction(self):
-        try:
-            if self.selected_index is None:
-                raise ValueError("No transaction selected")
-            description = self.entry_description.get().strip()
-            amount = self.entry_amount.get().strip()
-            category = self.category_var.get()
-            recipient = self.entry_recipient.get().strip()
-            payment_method = self.payment_var.get()
-            status = self.status_var.get()
-            if not amount.replace(".", "", 1).isdigit():
-                raise ValueError("Amount must be a valid number")
-            amount = float(amount)
-            self.transaction_manager.edit_transaction(
-                self.selected_index, description, amount, category, recipient, payment_method, status
-            )
-            self.update_transaction_lists()
-            self.update_balance()
-            self.update_dashboard()
-            self.stats_manager.update_transactions(self.transaction_manager.get_transactions())
-            self.clear_transaction_form()
-            self.selected_index = None
-            messagebox.showinfo("Success", "Transaction updated!")
-            logger.info(f"Transaction edited at index {self.selected_index}")
-        except Exception as e:
-            logger.error(f"Error editing transaction: {e}")
-            messagebox.showerror("Error", str(e))
-
-    def delete_transaction(self):
-        try:
-            if self.selected_index is None:
-                raise ValueError("No transaction selected")
-            if messagebox.askyesno("Confirm", "Delete this transaction?"):
-                self.transaction_manager.delete_transaction(self.selected_index)
-                self.update_transaction_lists()
-                self.update_balance()
-                self.update_dashboard()
-                self.stats_manager.update_transactions(self.transaction_manager.get_transactions())
-                self.clear_transaction_form()
-                self.selected_index = None
-                messagebox.showinfo("Success", "Transaction deleted!")
-                logger.info("Transaction deleted")
-        except Exception as e:
-            logger.error(f"Error deleting transaction: {e}")
-            messagebox.showerror("Error", str(e))
-
     def select_transaction(self, event, frame):
         try:
-            tree = getattr(self, f"tree_{frame.winfo_name()}")
+            # Map frames to their corresponding Treeview widgets
+            tree_map = {
+                self.all_frame: self.tree_all,
+                self.invoices_frame: self.tree_invoices,
+                self.deposits_frame: self.tree_deposits,
+                self.transfers_frame: self.tree_transfers
+            }
+            tree = tree_map[frame]
             selected = tree.selection()
             if not selected:
                 return
@@ -842,122 +820,70 @@ class TransactionGUI:
         except Exception as e:
             logger.error(f"Error selecting transaction: {e}")
 
-    def clear_transaction_form(self):
-        self.entry_description.delete(0, tk.END)
-        self.entry_amount.delete(0, tk.END)
-        self.entry_recipient.delete(0, tk.END)
-        self.category_var.set(self.transaction_manager.get_categories()[0])
-        self.payment_var.set(self.transaction_manager.get_payment_methods()[0])
-        self.status_var.set("Pending")
-        logger.debug("Cleared transaction form")
-
-    def load_account(self):
+    def add_transaction(self):
         try:
-            account = self.account_manager.get_account()
-            self.entry_name.delete(0, tk.END)
-            self.entry_emails.delete(0, tk.END)
-            self.entry_phones.delete(0, tk.END)
-            self.entry_ssn.delete(0, tk.END)
-            self.cards_text.delete(1.0, tk.END)
-            self.entry_name.insert(0, account["Name"])
-            self.entry_emails.insert(0, ",".join(account["Emails"]))
-            self.entry_phones.insert(0, ",".join(account["PhoneNumbers"]))
-            self.entry_ssn.insert(0, account["SSN"])
-            for card in self.wallet_manager.get_cards():
-                self.cards_text.insert(tk.END, f"{card['Type']} ending in {card['Number'][-4:]}\n")
-            if account["ImagePath"]:
-                img = Image.open(account["ImagePath"]).resize((100, 100))
-                self.image_ref = ImageTk.PhotoImage(img)
-                self.image_label.config(image=self.image_ref)
-            logger.debug("Loaded account details")
-        except Exception as e:
-            logger.error(f"Error loading account: {e}")
-
-    def save_account(self):
-        try:
-            name = self.entry_name.get().strip()
-            emails = [e.strip() for e in self.entry_emails.get().split(",") if e.strip()]
-            phones = [p.strip() for p in self.entry_phones.get().split(",") if p.strip()]
-            ssn = self.entry_ssn.get().strip()
-            image_path = self.account_manager.get_account().get("ImagePath", "")
-            self.account_manager.update_account(name, emails, phones, ssn, image_path)
-            messagebox.showinfo("Success", "Account updated!")
-            logger.info("Account updated")
-        except Exception as e:
-            logger.error(f"Error saving account: {e}")
-            messagebox.showerror("Error", str(e))
-
-    def upload_image(self):
-        try:
-            file = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
-            if file:
-                self.account_manager.update_account(
-                    self.account_manager.get_account()["Name"],
-                    self.account_manager.get_account()["Emails"],
-                    self.account_manager.get_account()["PhoneNumbers"],
-                    self.account_manager.get_account()["SSN"],
-                    file
-                )
-                img = Image.open(file).resize((100, 100))
-                self.image_ref = ImageTk.PhotoImage(img)
-                self.image_label.config(image=self.image_ref)
-                logger.info(f"Uploaded image: {file}")
-        except Exception as e:
-            logger.error(f"Error uploading image: {e}")
-            messagebox.showerror("Error", str(e))
-
-    def update_stats(self):
-        try:
-            percentages = self.stats_manager.get_recipient_percentages()
-            self.recipient_text.delete(1.0, tk.END)
-            for rec, perc in percentages.items():
-                self.recipient_text.insert(tk.END, f"{rec}: {perc:.1f}%\n")
-            logger.debug("Updated statistics")
-        except Exception as e:
-            logger.error(f"Error updating stats: {e}")
-
-    def show_yearly_spending(self):
-        try:
-            year = self.entry_year.get().strip()
-            if not year.isdigit():
-                raise ValueError("Year must be a number")
-            spending = self.stats_manager.get_yearly_spending(int(year))
-            self.yearly_label.config(text=f"Yearly Spending: ${spending:,.2f}")
-            logger.info(f"Calculated yearly spending for {year}: ${spending:,.2f}")
-        except Exception as e:
-            logger.error(f"Error showing yearly spending: {e}")
-            messagebox.showerror("Error", str(e))
-
-    def add_planned_payment(self):
-        try:
-            amount = self.entry_plan_amount.get().strip()
-            date = self.entry_plan_date.get().strip()
-            recipient = self.entry_plan_recipient.get().strip()
-            payment_method = self.plan_payment_var.get()
-            if not amount.replace(".", "", 1).isdigit():
-                raise ValueError("Amount must be a valid number")
-            self.calendar_manager.add_planned_payment(float(amount), date, recipient, payment_method)
-            self.update_calendar()
+            amount = float(self.entry_amount.get())
+            transaction = {
+                "Description": self.entry_description.get(),
+                "Amount": amount,
+                "Category": self.category_var.get(),
+                "Recipient": self.entry_recipient.get(),
+                "PaymentMethod": self.payment_var.get(),
+                "Status": self.status_var.get(),
+                "Date": datetime.now().strftime("%Y-%m-%d")
+            }
+            self.transaction_manager.add_transaction(transaction)
+            self.update_transaction_lists()
+            self.update_dashboard()
             self.update_notifications()
-            messagebox.showinfo("Success", "Planned payment added!")
-            logger.info("Planned payment added")
-        except Exception as e:
-            logger.error(f"Error adding planned payment: {e}")
-            messagebox.showerror("Error", str(e))
-
-    def add_appointment(self):
-        try:
-            title = self.entry_appointment_title.get().strip()
-            date = self.entry_appointment_date.get().strip()
-            time = self.entry_appointment_time.get().strip()
-            self.calendar_manager.add_appointment(title, date, time)
             self.update_calendar()
+            self.update_stats()
+            messagebox.showinfo("Success", "Transaction added successfully")
+            logger.debug(f"Added transaction: {transaction}")
+        except ValueError as e:
+            messagebox.showerror("Error", "Invalid amount")
+            logger.error(f"Error adding transaction: {e}")
+
+    def edit_transaction(self):
+        if self.selected_index is None:
+            messagebox.showerror("Error", "No transaction selected")
+            return
+        try:
+            amount = float(self.entry_amount.get())
+            transaction = {
+                "Description": self.entry_description.get(),
+                "Amount": amount,
+                "Category": self.category_var.get(),
+                "Recipient": self.entry_recipient.get(),
+                "PaymentMethod": self.payment_var.get(),
+                "Status": self.status_var.get(),
+                "Date": self.transaction_manager.get_transactions()[self.selected_index]["Date"]
+            }
+            self.transaction_manager.edit_transaction(self.selected_index, transaction)
+            self.update_transaction_lists()
+            self.update_dashboard()
             self.update_notifications()
-            messagebox.showinfo("Success", "Appointment added!")
-            logger.info("Appointment added")
-        except Exception as e:
-            logger.error(f"Error adding appointment: {e}")
-            messagebox.showerror("Error", str(e))
+            self.update_calendar()
+            self.update_stats()
+            messagebox.showinfo("Success", "Transaction updated successfully")
+            logger.debug(f"Edited transaction at index {self.selected_index}: {transaction}")
+        except ValueError as e:
+            messagebox.showerror("Error", "Invalid amount")
+            logger.error(f"Error editing transaction: {e}")
+
+    def delete_transaction(self):
+        if self.selected_index is None:
+            messagebox.showerror("Error", "No transaction selected")
+            return
+        self.transaction_manager.delete_transaction(self.selected_index)
+        self.selected_index = None
+        self.update_transaction_lists()
+        self.update_dashboard()
+        self.update_notifications()
+        self.update_calendar()
+        self.update_stats()
+        messagebox.showinfo("Success", "Transaction deleted successfully")
+        logger.debug("Deleted transaction")
 
     def update_calendar(self):
         try:
@@ -988,8 +914,7 @@ class TransactionGUI:
             for widget in self.planned_frame.winfo_children():
                 widget.grid_forget()
             tk.Label(self.planned_frame, text="Add Planned Payment", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
-            form = self.planned_frame.winfo_children()[1]
-            form.pack(fill="x", padx=10)
+            self.planned_form.pack(fill="x", padx=10)
             planned_tree.pack(expand=True, fill="both", padx=10, pady=5)
             for p in self.calendar_manager.get_planned_payments():
                 planned_tree.insert("", "end", values=(
@@ -1006,8 +931,7 @@ class TransactionGUI:
             for widget in self.appointments_frame.winfo_children():
                 widget.grid_forget()
             tk.Label(self.appointments_frame, text="Add Appointment", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
-            appt_form = self.appointments_frame.winfo_children()[1]
-            appt_form.pack(fill="x", padx=10)
+            self.appointment_form.pack(fill="x", padx=10)
             appt_tree.pack(expand=True, fill="both", padx=10, pady=5)
             for a in self.calendar_manager.get_appointments():
                 appt_tree.insert("", "end", values=(a["Title"], a["Date"], a["Time"]))
@@ -1016,82 +940,163 @@ class TransactionGUI:
         except Exception as e:
             logger.error(f"Error updating calendar: {e}")
 
+    def add_planned_payment(self):
+        try:
+            amount = float(self.entry_plan_amount.get())
+            payment = {
+                "Amount": amount,
+                "Date": self.entry_plan_date.get(),
+                "Recipient": self.entry_plan_recipient.get(),
+                "PaymentMethod": self.plan_payment_var.get()
+            }
+            self.calendar_manager.add_planned_payment(payment)
+            self.update_calendar()
+            self.update_notifications()
+            messagebox.showinfo("Success", "Planned payment added successfully")
+            logger.debug(f"Added planned payment: {payment}")
+        except ValueError as e:
+            messagebox.showerror("Error", "Invalid amount")
+            logger.error(f"Error adding planned payment: {e}")
+
+    def add_appointment(self):
+        appointment = {
+            "Title": self.entry_appointment_title.get(),
+            "Date": self.entry_appointment_date.get(),
+            "Time": self.entry_appointment_time.get()
+        }
+        self.calendar_manager.add_appointment(appointment)
+        self.update_calendar()
+        self.update_notifications()
+        messagebox.showinfo("Success", "Appointment added successfully")
+        logger.debug(f"Added appointment: {appointment}")
+
     def update_notifications(self):
-        try:
-            for row in self.notifications_payments.get_children():
-                self.notifications_payments.delete(row)
-            for p in self.calendar_manager.get_upcoming_payments():
-                self.notifications_payments.insert("", "end", values=(
-                    f"${p['Amount']:.2f}", p["Recipient"], p["Date"], p["PaymentMethod"]
-                ))
+        for row in self.notifications_payments.get_children():
+            self.notifications_payments.delete(row)
+        payments = self.calendar_manager.get_planned_payments()
+        logger.debug(f"Retrieved upcoming payments: {len(payments)}")
+        for p in payments:
+            self.notifications_payments.insert("", "end", values=(
+                f"${p['Amount']:.2f}", p["Recipient"], p["Date"], p["PaymentMethod"]
+            ))
 
-            for row in self.notifications_appointments.get_children():
-                self.notifications_appointments.delete(row)
-            for a in self.calendar_manager.get_upcoming_appointments():
-                self.notifications_appointments.insert("", "end", values=(
-                    a["Title"], a["Date"], a["Time"]
-                ))
-            logger.debug("Updated notifications")
-        except Exception as e:
-            logger.error(f"Error updating notifications: {e}")
-
-    def upload_card_image(self):
-        try:
-            file = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
-            if file:
-                self.temp_card_image = file
-                logger.info(f"Uploaded card image: {file}")
-            else:
-                self.temp_card_image = ""
-        except Exception as e:
-            logger.error(f"Error uploading card image: {e}")
-            messagebox.showerror("Error", str(e))
+        for row in self.notifications_appointments.get_children():
+            self.notifications_appointments.delete(row)
+        appointments = self.calendar_manager.get_appointments()
+        logger.debug(f"Retrieved upcoming appointments: {len(appointments)}")
+        for a in appointments:
+            self.notifications_appointments.insert("", "end", values=(
+                a["Title"], a["Date"], a["Time"]
+            ))
+        logger.debug("Updated notifications")
 
     def update_wallet(self):
-        try:
-            for widget in self.card_frame.winfo_children():
-                widget.destroy()
-            cards = self.wallet_manager.get_cards()
-            if cards:
-                main_card = cards[-1]
-                frame = tk.Frame(self.card_frame, bg="#000000", relief="raised", bd=2)
-                frame.pack(fill="x", pady=5)
-                tk.Label(frame, text=f"{main_card['Type']} ending in {main_card['Number'][-4:]}", font=("Arial", 10), bg="#000000", fg="#ffffff").pack(pady=5)
-                if main_card["ImagePath"]:
-                    img = Image.open(main_card["ImagePath"]).resize((150, 100))
-                    photo = ImageTk.PhotoImage(img)
-                    tk.Label(frame, image=photo, bg="#000000").pack()
-                    frame.image = photo
-                for card in reversed(cards[:-1][:3]):
-                    frame = tk.Frame(self.card_frame, bg="#000000", relief="sunken", bd=1)
-                    frame.pack(fill="x", pady=2)
-                    tk.Label(frame, text=f"{card['Type']} ending in {card['Number'][-4:]}", font=("Arial", 8), bg="#000000", fg="#ffffff").pack()
-            logger.debug("Updated wallet display")
-        except Exception as e:
-            logger.error(f"Error updating wallet: {e}")
+        for widget in self.card_frame.winfo_children():
+            widget.destroy()
+        cards = self.wallet_manager.get_cards()
+        for card in cards:
+            card_frame = tk.Frame(self.card_frame, bg=self.themes[self.current_theme]["content_bg"])
+            card_frame.pack(fill="x", pady=2)
+            tk.Label(card_frame, text=f"{card['Type']}: {card['Number'][-4:]}", font=("Arial", 10)).pack(side="left")
+            if card.get("Image"):
+                img = Image.open(card["Image"]).resize((50, 30), Image.Resampling.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+                tk.Label(card_frame, image=photo).pack(side="right")
+                card_frame.image = photo  # Keep reference
+        logger.debug("Updated wallet display")
 
     def add_card(self):
+        card = {
+            "Number": self.entry_card_number.get(),
+            "Type": self.card_type_var.get(),
+            "Image": getattr(self, "card_image_path", None)
+        }
+        self.wallet_manager.add_card(card)
+        self.update_wallet()
+        self.load_account()  # Update account tab
+        self.update_dashboard()
+        messagebox.showinfo("Success", "Card added successfully")
+        logger.debug(f"Added card: {card}")
+
+    def upload_card_image(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png *.jpg *.jpeg")])
+        if file_path:
+            self.card_image_path = file_path
+            messagebox.showinfo("Success", "Card image uploaded successfully")
+            logger.debug(f"Uploaded card image: {file_path}")
+
+    def upload_image(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png *.jpg *.jpeg")])
+        if file_path:
+            img = Image.open(file_path).resize((100, 100), Image.Resampling.LANCZOS)
+            self.image_ref = ImageTk.PhotoImage(img)
+            self.image_label.config(image=self.image_ref)
+            self.account_manager.set_image(file_path)
+            logger.debug(f"Uploaded account image: {file_path}")
+
+    def save_account(self):
+        details = {
+            "Name": self.entry_name.get(),
+            "Emails": self.entry_emails.get().split(","),
+            "PhoneNumbers": self.entry_phones.get().split(","),
+            "SSN": self.entry_ssn.get()
+        }
+        self.account_manager.set_details(details)
+        messagebox.showinfo("Success", "Account details saved successfully")
+        logger.debug(f"Saved account details: {details}")
+
+    def load_account(self):
+        details = self.account_manager.get_details()
+        logger.debug("Retrieved account details")
+        cards = self.wallet_manager.get_cards()
+        logger.debug("Retrieved cards")
+        self.entry_name.delete(0, tk.END)
+        self.entry_emails.delete(0, tk.END)
+        self.entry_phones.delete(0, tk.END)
+        self.entry_ssn.delete(0, tk.END)
+        self.cards_text.delete(1.0, tk.END)
+
+        self.entry_name.insert(0, details.get("Name", ""))
+        self.entry_emails.insert(0, ", ".join(details.get("Emails", [])))
+        self.entry_phones.insert(0, ", ".join(details.get("PhoneNumbers", [])))
+        self.entry_ssn.insert(0, details.get("SSN", ""))
+        for card in cards:
+            self.cards_text.insert(tk.END, f"{card['Type']}: {card['Number']}\n")
+
+        if details.get("Image"):
+            img = Image.open(details["Image"]).resize((100, 100), Image.Resampling.LANCZOS)
+            self.image_ref = ImageTk.PhotoImage(img)
+            self.image_label.config(image=self.image_ref)
+        logger.debug("Loaded account details")
+
+    def update_stats(self):
+        self.stats_manager.transactions = self.transaction_manager.get_transactions()
         try:
-            number = self.entry_card_number.get().strip()
-            card_type = self.card_type_var.get()
-            if not number:
-                raise ValueError("Card number cannot be empty")
-            # Use the temporary image path if available, otherwise default to empty string
-            image_path = getattr(self, 'temp_card_image', "")
-            self.wallet_manager.add_card(number, card_type, image_path)
-            self.update_wallet()
-            self.entry_card_number.delete(0, tk.END)
-            self.card_type_var.set("Visa")
-            self.temp_card_image = ""  # Reset the temporary image path
-            messagebox.showinfo("Success", "Card added!")
-            logger.info("Card added to wallet")
-        except Exception as e:
-            logger.error(f"Error adding card: {e}")
+            percentages = self.stats_manager.get_recipient_percentages()
+            self.recipient_text.delete(1.0, tk.END)
+            for recipient, percentage in percentages.items():
+                self.recipient_text.insert(tk.END, f"{recipient}: {percentage:.2f}%\n")
+        except ValueError as e:
+            self.recipient_text.delete(1.0, tk.END)
+            self.recipient_text.insert(tk.END, "No transaction data available")
+
+    def show_yearly_spending(self):
+        year = self.entry_year.get()
+        try:
+            spending = self.stats_manager.get_yearly_spending(year)
+            self.yearly_label.config(text=f"Yearly Spending: ${spending:.2f}")
+        except ValueError as e:
+            self.yearly_label.config(text="Yearly Spending: $0")
             messagebox.showerror("Error", str(e))
 
     def generate_reflection_report(self):
-        # Placeholder for reflection report generation
-        pass
+        transactions = self.transaction_manager.get_transactions()
+        total_spent = sum(t["Amount"] for t in transactions if t["Category"] in ["Invoice", "Transfer"])
+        total_received = sum(t["Amount"] for t in transactions if t["Category"] == "Deposit")
+        report = f"Reflection Report\nTotal Spent: ${total_spent:.2f}\nTotal Received: ${total_received:.2f}\n"
+        with open("reflection_report.txt", "w") as f:
+            f.write(report)
+        logger.debug("Generated reflection report")
 
 if __name__ == "__main__":
     root = tk.Tk()

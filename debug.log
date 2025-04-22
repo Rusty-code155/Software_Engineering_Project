@@ -97,3 +97,63 @@
 2025-04-20 23:58:14,883 - DEBUG - Summary - Income: 0, Expenses: 0, Net: 0
 2025-04-20 23:58:14,883 - DEBUG - Retrieved cards
 2025-04-20 23:58:14,883 - DEBUG - Updated dashboard
+2025-04-21 00:11:05,257 - DEBUG - matplotlib data path: C:\Users\PEEPLET\OneDrive - University of South Carolina Aiken\Documents\Software Engineering\Software_Engineering_Project\.venv\Lib\site-packages\matplotlib\mpl-data
+2025-04-21 00:11:05,295 - DEBUG - CONFIGDIR=C:\Users\PEEPLET\.matplotlib
+2025-04-21 00:11:05,299 - DEBUG - interactive is False
+2025-04-21 00:11:05,299 - DEBUG - platform is win32
+2025-04-21 00:11:05,712 - DEBUG - CACHEDIR=C:\Users\PEEPLET\.matplotlib
+2025-04-21 00:11:05,738 - DEBUG - Using fontManager instance from C:\Users\PEEPLET\.matplotlib\fontlist-v390.json
+2025-04-21 00:11:08,157 - DEBUG - TransactionManager initialized
+2025-04-21 00:11:08,157 - DEBUG - AccountManager initialized
+2025-04-21 00:11:08,157 - DEBUG - CalendarManager initialized
+2025-04-21 00:11:08,157 - DEBUG - WalletManager initialized
+2025-04-21 00:11:08,158 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-21 00:11:08,158 - DEBUG - StatsManager initialized
+2025-04-21 00:11:08,158 - DEBUG - Styles configured for theme: Default
+2025-04-21 00:11:08,174 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-21 00:11:08,174 - DEBUG - Summary - Income: 0, Expenses: 0, Net: 0
+2025-04-21 00:11:08,174 - DEBUG - Retrieved cards
+2025-04-21 00:11:08,174 - DEBUG - Updated dashboard
+2025-04-21 00:11:08,174 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-21 00:11:08,174 - DEBUG - Generated reflection report
+2025-04-21 00:11:08,174 - DEBUG - TransactionGUI initialized
+2025-04-21 00:12:05,188 - DEBUG - Retrieved transactions with filters - category: All, type: All Transactions
+2025-04-21 00:12:05,188 - DEBUG - Retrieved transactions with filters - category: Invoice, type: None
+2025-04-21 00:12:05,188 - DEBUG - Retrieved transactions with filters - category: Deposit, type: None
+2025-04-21 00:12:05,188 - DEBUG - Retrieved transactions with filters - category: Transfer, type: None
+2025-04-21 00:12:05,188 - DEBUG - Updated transaction lists
+2025-04-21 00:12:07,230 - ERROR - Error generating pie chart: No transaction data
+2025-04-21 00:12:07,230 - ERROR - Error generating bar chart: No spending data
+2025-04-21 00:12:07,246 - ERROR - Error generating scatter plot: No spending data
+2025-04-21 00:12:07,246 - ERROR - Error generating line graph: No spending data
+2025-04-21 00:12:07,246 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-21 00:12:08,380 - ERROR - Error updating calendar: bad window path name ".!frame2.!frame5.!notebook.!frame.!treeview"
+2025-04-21 00:12:11,932 - DEBUG - Retrieved planned payments
+2025-04-21 00:12:11,932 - DEBUG - Retrieved upcoming payments: 0
+2025-04-21 00:12:11,932 - DEBUG - Retrieved appointments
+2025-04-21 00:12:11,932 - DEBUG - Retrieved upcoming appointments: 0
+2025-04-21 00:12:11,932 - DEBUG - Updated notifications
+2025-04-21 00:12:12,767 - DEBUG - Retrieved cards
+2025-04-21 00:12:12,767 - DEBUG - Updated wallet display
+2025-04-21 00:14:42,244 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-21 00:14:42,244 - DEBUG - Summary - Income: 0, Expenses: 0, Net: 0
+2025-04-21 00:14:42,244 - DEBUG - Retrieved cards
+2025-04-21 00:14:42,244 - DEBUG - Updated dashboard
+2025-04-21 00:14:42,993 - DEBUG - Retrieved transactions with filters - category: All, type: All Transactions
+2025-04-21 00:14:42,993 - DEBUG - Retrieved transactions with filters - category: Invoice, type: None
+2025-04-21 00:14:42,995 - DEBUG - Retrieved transactions with filters - category: Deposit, type: None
+2025-04-21 00:14:42,995 - DEBUG - Retrieved transactions with filters - category: Transfer, type: None
+2025-04-21 00:14:42,995 - DEBUG - Updated transaction lists
+2025-04-21 00:14:44,209 - ERROR - Error generating pie chart: No transaction data
+2025-04-21 00:14:44,209 - ERROR - Error generating bar chart: No spending data
+2025-04-21 00:14:44,209 - ERROR - Error generating scatter plot: No spending data
+2025-04-21 00:14:44,209 - ERROR - Error generating line graph: No spending data
+2025-04-21 00:14:44,209 - DEBUG - Retrieved transactions with filters - category: None, type: None
+2025-04-21 00:14:44,903 - ERROR - Error updating calendar: bad window path name ".!frame2.!frame15.!notebook.!frame.!treeview"
+2025-04-21 00:14:46,086 - DEBUG - Retrieved planned payments
+2025-04-21 00:14:46,101 - DEBUG - Retrieved upcoming payments: 0
+2025-04-21 00:14:46,101 - DEBUG - Retrieved appointments
+2025-04-21 00:14:46,103 - DEBUG - Retrieved upcoming appointments: 0
+2025-04-21 00:14:46,103 - DEBUG - Updated notifications
+2025-04-21 00:14:47,155 - DEBUG - Retrieved cards
+2025-04-21 00:14:47,155 - DEBUG - Updated wallet display
