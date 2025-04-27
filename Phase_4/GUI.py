@@ -822,26 +822,25 @@ class TransactionGUI:
 
     def add_transaction(self):
         try:
-            amount = float(self.entry_amount.get())
-            transaction = {
-                "Description": self.entry_description.get(),
-                "Amount": amount,
-                "Category": self.category_var.get(),
-                "Recipient": self.entry_recipient.get(),
-                "PaymentMethod": self.payment_var.get(),
-                "Status": self.status_var.get(),
-                "Date": datetime.now().strftime("%Y-%m-%d")
-            }
-            self.transaction_manager.add_transaction(transaction)
+            amount_str = self.entry_amount.get().replace('$', '').strip()  # Remove $ symbol
+            amount = float(amount_str)
+            description = self.entry_description.get()
+            category = self.category_var.get()
+            recipient = self.entry_recipient.get()
+            payment_method = self.payment_var.get()
+            status = self.status_var.get()
+            self.transaction_manager.add_transaction(
+                description, amount, category, recipient, payment_method, status
+            )
             self.update_transaction_lists()
             self.update_dashboard()
             self.update_notifications()
             self.update_calendar()
             self.update_stats()
             messagebox.showinfo("Success", "Transaction added successfully")
-            logger.debug(f"Added transaction: {transaction}")
+            logger.debug(f"Added transaction: {description}, {amount}, {category}")
         except ValueError as e:
-            messagebox.showerror("Error", "Invalid amount")
+            messagebox.showerror("Error", "Invalid amount format")
             logger.error(f"Error adding transaction: {e}")
 
     def edit_transaction(self):
@@ -887,59 +886,78 @@ class TransactionGUI:
 
     def update_calendar(self):
         try:
-            # Payments Tab: Display past transactions
-            payments_tree = ttk.Treeview(
-                self.payments_frame, columns=("Amount", "Recipient", "Date", "PaymentMethod"), show="headings"
-            )
-            payments_tree.heading("Amount", text="Amount")
-            payments_tree.heading("Recipient", text="Recipient")
-            payments_tree.heading("Date", text="Date")
-            payments_tree.heading("PaymentMethod", text="Payment Method")
-            for widget in self.payments_frame.winfo_children():
-                widget.destroy()
-            payments_tree.pack(expand=True, fill="both", padx=10, pady=5)
+            # Initialize Treeview widgets if they don't exist
+            if not hasattr(self, 'payments_tree'):
+                self.payments_tree = ttk.Treeview(
+                    self.payments_frame, columns=("Amount", "Recipient", "Date", "PaymentMethod"), show="headings"
+                )
+                self.payments_tree.heading("Amount", text="Amount")
+                self.payments_tree.heading("Recipient", text="Recipient")
+                self.payments_tree.heading("Date", text="Date")
+                self.payments_tree.heading("PaymentMethod", text="Payment Method")
+                self.payments_tree.pack(expand=True, fill="both", padx=10, pady=5)
+    
+            if not hasattr(self, 'planned_tree'):
+                self.planned_tree = ttk.Treeview(
+                    self.planned_frame, columns=("Amount", "Recipient", "Date", "PaymentMethod"), show="headings"
+                )
+                self.planned_tree.heading("Amount", text="Amount")
+                self.planned_tree.heading("Recipient", text="Recipient")
+                self.planned_tree.heading("Date", text="Date")
+                self.payments_tree.heading("PaymentMethod", text="Payment Method")
+                self.planned_tree.pack(expand=True, fill="both", padx=10, pady=5)
+    
+            if not hasattr(self, 'appt_tree'):
+                self.appt_tree = ttk.Treeview(
+                    self.appointments_frame, columns=("Title", "Date", "Time"), show="headings"
+                )
+                self.appt_tree.heading("Title", text="Title")
+                self.appt_tree.heading("Date", text="Date")
+                self.appt_tree.heading("Time", text="Time")
+                self.appt_tree.pack(expand=True, fill="both", padx=10, pady=5)
+    
+            # Clear existing rows
+            for row in self.payments_tree.get_children():
+                self.payments_tree.delete(row)
+            for row in self.planned_tree.get_children():
+                self.planned_tree.delete(row)
+            for row in self.appt_tree.get_children():
+                self.appt_tree.delete(row)
+    
+            # Populate Payments
             for t in self.transaction_manager.get_transactions():
-                payments_tree.insert("", "end", values=(
+                self.payments_tree.insert("", "end", values=(
                     f"${t['Amount']:.2f}", t["Recipient"], t["Date"], t["PaymentMethod"]
                 ))
-
-            # Planned Payments Tab: Display planned payments below the form
-            planned_tree = ttk.Treeview(
-                self.planned_frame, columns=("Amount", "Recipient", "Date", "PaymentMethod"), show="headings"
-            )
-            planned_tree.heading("Amount", text="Amount")
-            planned_tree.heading("Recipient", text="Recipient")
-            planned_tree.heading("Date", text="Date")
-            planned_tree.heading("PaymentMethod", text="Payment Method")
+    
+            # Populate Planned Payments
+            for p in self.calendar_manager.get_planned_payments():
+                self.planned_tree.insert("", "end", values=(
+                    f"${p['Amount']:.2f}", p["Recipient"], p["Date"], p["PaymentMethod"]
+                ))
+    
+            # Populate Appointments
+            for a in self.calendar_manager.get_appointments():
+                self.appt_tree.insert("", "end", values=(a["Title"], a["Date"], a["Time"]))
+    
+            # Ensure form is visible
             for widget in self.planned_frame.winfo_children():
                 widget.grid_forget()
             tk.Label(self.planned_frame, text="Add Planned Payment", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
             self.planned_form.pack(fill="x", padx=10)
-            planned_tree.pack(expand=True, fill="both", padx=10, pady=5)
-            for p in self.calendar_manager.get_planned_payments():
-                planned_tree.insert("", "end", values=(
-                    f"${p['Amount']:.2f}", p["Recipient"], p["Date"], p["PaymentMethod"]
-                ))
-
-            # Appointments Tab: Display appointments below the form
-            appt_tree = ttk.Treeview(
-                self.appointments_frame, columns=("Title", "Date", "Time"), show="headings"
-            )
-            appt_tree.heading("Title", text="Title")
-            appt_tree.heading("Date", text="Date")
-            appt_tree.heading("Time", text="Time")
+            self.planned_tree.pack(expand=True, fill="both", padx=10, pady=5)
+    
             for widget in self.appointments_frame.winfo_children():
                 widget.grid_forget()
             tk.Label(self.appointments_frame, text="Add Appointment", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
             self.appointment_form.pack(fill="x", padx=10)
-            appt_tree.pack(expand=True, fill="both", padx=10, pady=5)
-            for a in self.calendar_manager.get_appointments():
-                appt_tree.insert("", "end", values=(a["Title"], a["Date"], a["Time"]))
-
+            self.appt_tree.pack(expand=True, fill="both", padx=10, pady=5)
+    
             logger.debug("Updated calendar displays")
         except Exception as e:
             logger.error(f"Error updating calendar: {e}")
-
+            messagebox.showerror("Error", f"Failed to update calendar: {e}")
+    
     def add_planned_payment(self):
         try:
             amount = float(self.entry_plan_amount.get())
@@ -1028,25 +1046,41 @@ class TransactionGUI:
     def upload_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png *.jpg *.jpeg")])
         if file_path:
-            img = Image.open(file_path).resize((100, 100), Image.Resampling.LANCZOS)
-            self.image_ref = ImageTk.PhotoImage(img)
-            self.image_label.config(image=self.image_ref)
-            self.account_manager.set_image(file_path)
-            logger.debug(f"Uploaded account image: {file_path}")
-
+            try:
+                img = Image.open(file_path).resize((100, 100), Image.Resampling.LANCZOS)
+                self.image_ref = ImageTk.PhotoImage(img)
+                self.image_label.config(image=self.image_ref)
+                # Update account with new image path
+                current_account = self.account_manager.get_account()
+                self.account_manager.update_account(
+                    current_account["Name"],
+                    current_account["Emails"],
+                    current_account["PhoneNumbers"],
+                    current_account["SSN"],
+                    file_path
+                )
+                messagebox.showinfo("Success", "Image uploaded successfully")
+                logger.debug(f"Uploaded account image: {file_path}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to upload image: {e}")
+                logger.error(f"Error uploading image: {e}")
+            
     def save_account(self):
-        details = {
-            "Name": self.entry_name.get(),
-            "Emails": self.entry_emails.get().split(","),
-            "PhoneNumbers": self.entry_phones.get().split(","),
-            "SSN": self.entry_ssn.get()
-        }
-        self.account_manager.set_details(details)
-        messagebox.showinfo("Success", "Account details saved successfully")
-        logger.debug(f"Saved account details: {details}")
-
+        try:
+            name = self.entry_name.get()
+            emails = [email.strip() for email in self.entry_emails.get().split(",") if email.strip()]
+            phones = [phone.strip() for phone in self.entry_phones.get().split(",") if phone.strip()]
+            ssn = self.entry_ssn.get()
+            image_path = self.account_manager.get_account().get("ImagePath", "")
+            self.account_manager.update_account(name, emails, phones, ssn, image_path)
+            messagebox.showinfo("Success", "Account details saved successfully")
+            logger.debug(f"Saved account details: {name}, {emails}, {phones}, {ssn}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save account details: {e}")
+            logger.error(f"Error saving account details: {e}")
+        
     def load_account(self):
-        details = self.account_manager.get_details()
+        details = self.account_manager.get_account()  # Changed from get_details to get_account
         logger.debug("Retrieved account details")
         cards = self.wallet_manager.get_cards()
         logger.debug("Retrieved cards")
@@ -1063,12 +1097,12 @@ class TransactionGUI:
         for card in cards:
             self.cards_text.insert(tk.END, f"{card['Type']}: {card['Number']}\n")
 
-        if details.get("Image"):
-            img = Image.open(details["Image"]).resize((100, 100), Image.Resampling.LANCZOS)
+        if details.get("ImagePath"):  # Changed from Image to ImagePath to match account.py
+            img = Image.open(details["ImagePath"]).resize((100, 100), Image.Resampling.LANCZOS)
             self.image_ref = ImageTk.PhotoImage(img)
             self.image_label.config(image=self.image_ref)
         logger.debug("Loaded account details")
-
+    
     def update_stats(self):
         self.stats_manager.transactions = self.transaction_manager.get_transactions()
         try:
