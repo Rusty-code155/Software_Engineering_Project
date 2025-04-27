@@ -1,6 +1,5 @@
 # Written by: Turner Miles Peeples
 
-
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog, colorchooser
 from PIL import Image, ImageTk
@@ -11,6 +10,10 @@ from stats import StatsManager
 from cal_manager import CalendarManager
 from wallet import WalletManager
 from datetime import datetime
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -21,94 +24,52 @@ logger = logging.getLogger(__name__)
 
 class TransactionGUI:
     def __init__(self, root):
-        self.root = root
-        self.root.title("Transaction Tracker")
-        self.root.geometry("1000x700")
+        self.root = root  
+        self.root.title("Transaction Manager")
+        self.root.geometry("800x600")
+
         self.transaction_manager = TransactionManager()
         self.account_manager = AccountManager()
+        self.stats_manager = StatsManager(self.transaction_manager.get_transactions())
         self.calendar_manager = CalendarManager()
         self.wallet_manager = WalletManager()
-        self.stats_manager = StatsManager(self.transaction_manager.get_transactions())
-        self.selected_index = None
-        self.image_ref = None
-        self.style = ttk.Style()
+
         self.themes = {
-            "Default": {
-                "sidebar_bg": "#d9e1e8",
-                "active_tab": "#3498db",
+            "Light": {
+                "sidebar_bg": "#f0f0f0",
                 "content_bg": "#ffffff",
+                "button_bg": "#e0e0e0",
+                "button_fg": "#000000",
                 "text_fg": "#000000",
-                "button_bg": "#3498db",
-                "button_fg": "#ffffff"
+                "active_tab": "#d0d0d0"
             },
             "Dark": {
-                "sidebar_bg": "#2c3e50",
-                "active_tab": "#2980b9",
-                "content_bg": "#34495e",
-                "text_fg": "#ecf0f1",
-                "button_bg": "#2980b9",
-                "button_fg": "#ecf0f1"
-            },
-            "Light": {
-                "sidebar_bg": "#f0f4f8",
-                "active_tab": "#95a5a6",
-                "content_bg": "#ffffff",
-                "text_fg": "#2c3e50",
-                "button_bg": "#95a5a6",
-                "button_fg": "#ffffff"
+                "sidebar_bg": "#333333",
+                "content_bg": "#444444",
+                "button_bg": "#555555",
+                "button_fg": "#ffffff",
+                "text_fg": "#ffffff",
+                "active_tab": "#666666"
             }
         }
-        self.current_theme = "Default"
-        self.setup_styles()
+        self.current_theme = "Light"
+
+        
+        self.style = ttk.Style()
+        self.tab_frames = {}  
+        self.selected_index = None  
+
         self.setup_gui()
         self.generate_reflection_report()
         logger.debug("TransactionGUI initialized")
 
-    def setup_styles(self):
-        """Apply UI styles based on the current theme."""
-        theme = self.themes[self.current_theme]
-        self.style.configure("TNotebook", background=theme["content_bg"], tabposition="wn")
-        self.style.configure("TNotebook.Tab", background=theme["sidebar_bg"], padding=[10, 5], font=("Arial", 10))
-        self.style.map("TNotebook.Tab", background=[("selected", theme["active_tab"])])
-        self.style.configure("TFrame", background=theme["content_bg"])
-        self.style.configure("TLabel", background=theme["content_bg"], foreground=theme["text_fg"], font=("Arial", 10))
-        self.style.configure("TButton", font=("Arial", 10), background=theme["button_bg"], foreground=theme["button_fg"])
-        self.style.configure("TCombobox", font=("Arial", 10))
-        self.style.configure("Treeview", font=("Arial", 10), background=theme["content_bg"], foreground=theme["text_fg"])
-        self.style.configure("Treeview.Heading", font=("Arial", 10, "bold"))
-        logger.debug(f"Styles configured for theme: {self.current_theme}")
-
-    def apply_theme(self):
-        """Apply the current theme to all widgets."""
-        theme = self.themes[self.current_theme]
-        self.setup_styles()
-        self.sidebar.configure(bg=theme["sidebar_bg"])
-        self.content.configure(bg=theme["content_bg"])
-        for name, btn in self.nav_buttons.items():
-            btn.configure(bg=theme["active_tab"] if name == self.current_tab else theme["sidebar_bg"], fg=theme["text_fg"])
-        # Rebuild the current tab to apply styles
-        setup_func = {
-            "Dashboard": self.setup_dashboard,
-            "Transactions": self.setup_transactions,
-            "Account Information": self.setup_account,
-            "Statistics": self.setup_stats,
-            "Calendar": self.setup_calendar,
-            "Notifications": self.setup_notifications,
-            "Wallet": self.setup_wallet,
-            "Settings": self.setup_settings,
-            "Payment": self.setup_payment
-        }.get(self.current_tab, self.setup_dashboard)
-        self.switch_tab(self.current_tab, setup_func)
-        logger.debug(f"Applied theme: {self.current_theme}")
-
     def setup_gui(self):
-        # Main layout: sidebar and content area
         self.sidebar = tk.Frame(self.root, bg=self.themes[self.current_theme]["sidebar_bg"], width=200)
         self.sidebar.pack(side="left", fill="y")
         self.content = tk.Frame(self.root, bg=self.themes[self.current_theme]["content_bg"])
         self.content.pack(side="left", expand=True, fill="both")
 
-        # Sidebar navigation
+        
         self.nav_buttons = {}
         self.current_tab = "Dashboard"
         tabs = [
@@ -124,14 +85,114 @@ class TransactionGUI:
         ]
         for tab_name, setup_func in tabs:
             btn = tk.Button(
-                self.sidebar, text=tab_name, font=("Arial", 12), bg=self.themes[self.current_theme]["sidebar_bg"], fg=self.themes[self.current_theme]["text_fg"], bd=0,
+                self.sidebar, text=tab_name, font=("Arial", 12),
+                bg=self.themes[self.current_theme]["sidebar_bg"],
+                fg=self.themes[self.current_theme]["text_fg"], bd=0,
                 command=lambda name=tab_name, func=setup_func: self.switch_tab(name, func)
             )
             btn.pack(fill="x", pady=5)
             self.nav_buttons[tab_name] = btn
 
-        # Default to Dashboard
+        
+        for tab_name, setup_func in tabs:
+            frame = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+            self.tab_frames[tab_name] = frame
+            setup_func()  
+
+     
         self.switch_tab("Dashboard", self.setup_dashboard)
+        
+    def switch_tab(self, tab_name, setup_func):
+        """Switch between tabs by showing/hiding frames."""
+        self.current_tab = tab_name
+        theme = self.themes[self.current_theme]
+        for name, btn in self.nav_buttons.items():
+            btn.config(bg=theme["active_tab"] if name == tab_name else theme["sidebar_bg"], fg=theme["text_fg"])
+
+        # Hide all tab frames
+        for frame in self.tab_frames.values():
+            frame.pack_forget()
+
+        # Show the selected tab frame
+        if tab_name not in self.tab_frames:
+            self.tab_frames[tab_name] = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+            setup_func()
+        self.tab_frames[tab_name].pack(expand=True, fill="both")
+        logger.debug(f"Switched to tab: {tab_name}")
+
+    def apply_theme(self):
+        """Apply the current theme to all widgets without destroying tabs."""
+        theme = self.themes[self.current_theme]
+        self.setup_styles()
+        self.sidebar.configure(bg=theme["sidebar_bg"])
+        self.content.configure(bg=theme["content_bg"])
+        for name, btn in self.nav_buttons.items():
+            btn.configure(bg=theme["active_tab"] if name == self.current_tab else theme["sidebar_bg"], fg=theme["text_fg"])
+
+        # Update existing tab frames without destroying them
+        for tab_name, frame in self.tab_frames.items():
+            frame.configure(bg=theme["content_bg"])
+            # Update child widgets recursively
+            self._update_widget_tree(frame, theme)
+
+        # Restore state by updating tabs
+        if self.current_tab == "Dashboard":
+            self.update_dashboard()
+        elif self.current_tab == "Transactions":
+            self.update_transaction_lists()
+        elif self.current_tab == "Account Information":
+            self.load_account()
+        elif self.current_tab == "Statistics":
+            self.update_stats()
+        elif self.current_tab == "Calendar":
+            self.update_calendar()
+        elif self.current_tab == "Notifications":
+            self.update_notifications()
+        elif self.current_tab == "Wallet":
+            self.update_wallet()
+        elif self.current_tab == "Payment":
+            self.update_payment()
+        elif self.current_tab == "Settings":
+            pass
+
+        logger.debug(f"Applied theme: {self.current_theme}")
+
+    def _update_widget_tree(self, widget, theme):
+        """Recursively update the theme of a widget and its children."""
+        try:
+            # Update background and foreground colors
+            if isinstance(widget, (tk.Frame, tk.Label, ttk.Frame, ttk.Label)):
+                widget.configure(bg=theme["content_bg"])
+                if isinstance(widget, (tk.Label, ttk.Label)):
+                    widget.configure(fg=theme["text_fg"])
+            elif isinstance(widget, (tk.Button, ttk.Button)):
+                widget.configure(bg=theme["button_bg"], fg=theme["button_fg"])
+            elif isinstance(widget, (ttk.Treeview, ttk.Combobox)):
+                pass  # Styles are handled by setup_styles
+            elif isinstance(widget, tk.Text):
+                widget.configure(bg=theme["content_bg"], fg=theme["text_fg"])
+
+            # Recursively update children
+            for child in widget.winfo_children():
+                self._update_widget_tree(child, theme)
+        except Exception as e:
+            logger.error(f"Error updating widget theme: {e}")
+
+    def setup_styles(self):
+        """Apply UI styles based on the current theme."""
+        theme = self.themes[self.current_theme]
+        self.style.configure("TNotebook", background=theme["content_bg"], tabposition="wn")
+        self.style.configure("TNotebook.Tab", background=theme["sidebar_bg"], padding=[10, 5], font=("Arial", 10))
+        self.style.map("TNotebook.Tab", background=[("selected", theme["active_tab"])])
+        self.style.configure("TFrame", background=theme["content_bg"])
+        self.style.configure("TLabel", background=theme["content_bg"], foreground=theme["text_fg"], font=("Arial", 10))
+        self.style.configure("TButton", font=("Arial", 10), background=theme["button_bg"], foreground=theme["button_fg"])
+        self.style.configure("TCombobox", font=("Arial", 10))
+        self.style.configure("Treeview", font=("Arial", 10), background=theme["content_bg"], foreground=theme["text_fg"])
+        self.style.configure("Treeview.Heading", font=("Arial", 10, "bold"))
+        logger.debug(f"Styles configured for theme: {self.current_theme}")
+
+    
 
     def switch_tab(self, tab_name, setup_func):
         """Switch between tabs and highlight the active one."""
@@ -142,8 +203,9 @@ class TransactionGUI:
         for widget in self.content.winfo_children():
             widget.destroy()
         setup_func()
-
+    
     def setup_dashboard(self):
+        self.widgets = {}
         frame = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
         frame.pack(expand=True, fill="both", padx=20, pady=20)
 
@@ -386,13 +448,22 @@ class TransactionGUI:
         self.bar_color = self.stats_manager.default_colors['bar']
         self.scatter_color = self.stats_manager.default_colors['scatter']
         self.scatter_line_color = self.stats_manager.default_colors['scatter_line']
-        self.line_color = self.stats_manager.default_colors['line']
+        self.line_color = self.stats_manager.default_colors['line']  # Fixed line
         self.zoom_levels = {
             "pie": 1.0,
             "bar": 1.0,
             "scatter": 1.0,
             "line": 1.0
         }
+        # Initialize canvas attributes as None
+        self.pie_canvas = None
+        self.pie_fig = None
+        self.bar_canvas = None
+        self.bar_fig = None
+        self.scatter_canvas = None
+        self.scatter_fig = None
+        self.line_canvas = None
+        self.line_fig = None
 
         # Pie Chart
         control_frame = tk.Frame(self.pie_frame, bg=self.themes[self.current_theme]["content_bg"])
@@ -401,8 +472,9 @@ class TransactionGUI:
         try:
             self.pie_canvas, self.pie_fig = self.stats_manager.get_pie_chart(self.pie_frame, colors=self.pie_colors)
             self.pie_canvas.get_tk_widget().pack(expand=True, fill="both")
-        except ValueError as e:
-            tk.Label(self.pie_frame, text="No transaction data available", font=("Arial", 12)).pack(expand=True, fill="both")
+        except Exception as e:
+            logger.error(f"Failed to generate pie chart: {e}")
+            tk.Label(self.pie_frame, text="Unable to generate pie chart", font=("Arial", 12)).pack(expand=True, fill="both")
 
         # Bar Graph
         control_frame = tk.Frame(self.bar_frame, bg=self.themes[self.current_theme]["content_bg"])
@@ -413,8 +485,9 @@ class TransactionGUI:
         try:
             self.bar_canvas, self.bar_fig = self.stats_manager.get_bar_chart(self.bar_frame, color=self.bar_color, zoom=self.zoom_levels["bar"])
             self.bar_canvas.get_tk_widget().pack(expand=True, fill="both")
-        except ValueError as e:
-            tk.Label(self.bar_frame, text="No transaction data available", font=("Arial", 12)).pack(expand=True, fill="both")
+        except Exception as e:
+            logger.error(f"Failed to generate bar chart: {e}")
+            tk.Label(self.bar_frame, text="Unable to generate bar chart", font=("Arial", 12)).pack(expand=True, fill="both")
 
         # Scatter Plot
         control_frame = tk.Frame(self.scatter_frame, bg=self.themes[self.current_theme]["content_bg"])
@@ -426,8 +499,9 @@ class TransactionGUI:
         try:
             self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
             self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
-        except ValueError as e:
-            tk.Label(self.scatter_frame, text="No transaction data available", font=("Arial", 12)).pack(expand=True, fill="both")
+        except Exception as e:
+            logger.error(f"Failed to generate scatter plot: {e}")
+            tk.Label(self.scatter_frame, text="Unable to generate scatter plot", font=("Arial", 12)).pack(expand=True, fill="both")
 
         # Line Graph
         control_frame = tk.Frame(self.line_frame, bg=self.themes[self.current_theme]["content_bg"])
@@ -438,8 +512,9 @@ class TransactionGUI:
         try:
             self.line_canvas, self.line_fig = self.stats_manager.get_line_graph(self.line_frame, color=self.line_color, zoom=self.zoom_levels["line"])
             self.line_canvas.get_tk_widget().pack(expand=True, fill="both")
-        except ValueError as e:
-            tk.Label(self.line_frame, text="No transaction data available", font=("Arial", 12)).pack(expand=True, fill="both")
+        except Exception as e:
+            logger.error(f"Failed to generate line graph: {e}")
+            tk.Label(self.line_frame, text="Unable to generate line graph", font=("Arial", 12)).pack(expand=True, fill="both")
 
         tk.Label(self.recipient_frame, text="Recipient Percentages:", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
         self.recipient_text = tk.Text(self.recipient_frame, height=5)
@@ -455,83 +530,144 @@ class TransactionGUI:
         self.yearly_label.pack(anchor="w", padx=10, pady=5)
 
         self.update_stats()
-
+        
     def change_pie_colors(self):
-        colors = []
-        for i in range(4):  # Assuming up to 4 categories
-            color = colorchooser.askcolor(title=f"Select Color for Category {i+1}")[1]
-            if color:
-                colors.append(color)
-        if colors:
-            self.pie_colors = colors
-            self.pie_canvas.get_tk_widget().destroy()
-            self.pie_fig.close()
-            self.pie_canvas, self.pie_fig = self.stats_manager.get_pie_chart(self.pie_frame, colors=self.pie_colors)
-            self.pie_canvas.get_tk_widget().pack(expand=True, fill="both")
-            logger.debug("Updated pie chart colors")
+        try:
+            colors = []
+            for i in range(4):  # Assuming up to 4 categories
+                color = colorchooser.askcolor(title=f"Select Color for Category {i+1}")[1]
+                if color:
+                    colors.append(color)
+            if colors:
+                self.pie_colors = colors
+                if self.pie_canvas is not None:
+                    self.pie_canvas.get_tk_widget().destroy()
+                if self.pie_fig is not None:
+                    plt.close(self.pie_fig)
+                self.pie_canvas, self.pie_fig = self.stats_manager.get_pie_chart(self.pie_frame, colors=self.pie_colors)
+                self.pie_canvas.get_tk_widget().pack(expand=True, fill="both")
+                logger.debug("Updated pie chart colors")
+        except Exception as e:
+            logger.error(f"Error changing pie chart colors: {e}")
+            messagebox.showerror("Error", f"Failed to change pie chart colors: {e}")
 
     def change_bar_color(self):
-        color = colorchooser.askcolor(title="Select Bar Color")[1]
-        if color:
-            self.bar_color = color
-            self.bar_canvas.get_tk_widget().destroy()
-            self.bar_fig.close()
-            self.bar_canvas, self.bar_fig = self.stats_manager.get_bar_chart(self.bar_frame, color=self.bar_color, zoom=self.zoom_levels["bar"])
-            self.bar_canvas.get_tk_widget().pack(expand=True, fill="both")
-            logger.debug("Updated bar chart color")
-
+        try:
+            color = colorchooser.askcolor(title="Select Bar Color")[1]
+            if color:
+                self.bar_color = color
+                if self.bar_canvas is not None:
+                    self.bar_canvas.get_tk_widget().destroy()
+                if self.bar_fig is not None:
+                    plt.close(self.bar_fig)
+                self.bar_canvas, self.bar_fig = self.stats_manager.get_bar_chart(self.bar_frame, color=self.bar_color, zoom=self.zoom_levels["bar"])
+                self.bar_canvas.get_tk_widget().pack(expand=True, fill="both")
+                logger.debug("Updated bar chart color")
+        except Exception as e:
+            logger.error(f"Error changing bar chart color: {e}")
+            messagebox.showerror("Error", f"Failed to change bar chart color: {e}")
+        
     def change_scatter_color(self):
-        color = colorchooser.askcolor(title="Select Scatter Color")[1]
-        if color:
-            self.scatter_color = color
-            self.scatter_canvas.get_tk_widget().destroy()
-            self.scatter_fig.close()
-            self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
-            self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
-            logger.debug("Updated scatter plot color")
+        try:
+            color = colorchooser.askcolor(title="Select Scatter Color")[1]
+            if color:
+                self.scatter_color = color
+                if self.scatter_canvas is not None:
+                    self.scatter_canvas.get_tk_widget().destroy()
+                if self.scatter_fig is not None:
+                    plt.close(self.scatter_fig)
+                self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
+                self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
+                logger.debug("Updated scatter plot color")
+        except Exception as e:
+            logger.error(f"Error changing scatter plot color: {e}")
+            messagebox.showerror("Error", f"Failed to change scatter plot color: {e}")
 
     def change_scatter_line_color(self):
-        color = colorchooser.askcolor(title="Select Line Color")[1]
-        if color:
-            self.scatter_line_color = color
-            self.scatter_canvas.get_tk_widget().destroy()
-            self.scatter_fig.close()
-            self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
-            self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
-            logger.debug("Updated scatter plot line color")
-
+        try:
+            color = colorchooser.askcolor(title="Select Line Color")[1]
+            if color:
+                self.scatter_line_color = color
+                if self.scatter_canvas is not None:
+                    self.scatter_canvas.get_tk_widget().destroy()
+                if self.scatter_fig is not None:
+                    plt.close(self.scatter_fig)
+                self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
+                self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
+                logger.debug("Updated scatter plot line color")
+        except Exception as e:
+            logger.error(f"Error changing scatter plot line color: {e}")
+            messagebox.showerror("Error", f"Failed to change scatter plot line color: {e}")
+            
     def change_line_color(self):
-        color = colorchooser.askcolor(title="Select Line Color")[1]
-        if color:
-            self.line_color = color
-            self.line_canvas.get_tk_widget().destroy()
-            self.line_fig.close()
-            self.line_canvas, self.line_fig = self.stats_manager.get_line_graph(self.line_frame, color=self.line_color, zoom=self.zoom_levels["line"])
-            self.line_canvas.get_tk_widget().pack(expand=True, fill="both")
-            logger.debug("Updated line graph color")
+        try:
+            color = colorchooser.askcolor(title="Select Line Color")[1]
+            if color:
+                self.line_color = color
+                if self.line_canvas is not None:
+                    self.line_canvas.get_tk_widget().destroy()
+                if self.line_fig is not None:
+                    plt.close(self.line_fig)
+                self.line_canvas, self.line_fig = self.stats_manager.get_line_graph(self.line_frame, color=self.line_color, zoom=self.zoom_levels["line"])
+                self.line_canvas.get_tk_widget().pack(expand=True, fill="both")
+                logger.debug("Updated line graph color")
+        except Exception as e:
+            logger.error(f"Error changing line graph color: {e}")
+            messagebox.showerror("Error", f"Failed to change line graph color: {e}")
 
     def zoom_graph(self, graph_type, factor):
-        self.zoom_levels[graph_type] *= factor
-        if self.zoom_levels[graph_type] < 0.5:
-            self.zoom_levels[graph_type] = 0.5
-        elif self.zoom_levels[graph_type] > 2.0:
-            self.zoom_levels[graph_type] = 2.0
-        if graph_type == "bar":
-            self.bar_canvas.get_tk_widget().destroy()
-            self.bar_fig.close()
-            self.bar_canvas, self.bar_fig = self.stats_manager.get_bar_chart(self.bar_frame, color=self.bar_color, zoom=self.zoom_levels["bar"])
-            self.bar_canvas.get_tk_widget().pack(expand=True, fill="both")
-        elif graph_type == "scatter":
-            self.scatter_canvas.get_tk_widget().destroy()
-            self.scatter_fig.close()
-            self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
-            self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
-        elif graph_type == "line":
-            self.line_canvas.get_tk_widget().destroy()
-            self.line_fig.close()
-            self.line_canvas, self.line_fig = self.stats_manager.get_line_graph(self.line_frame, color=self.line_color, zoom=self.zoom_levels["line"])
-            self.line_canvas.get_tk_widget().pack(expand=True, fill="both")
-        logger.debug(f"Zoomed {graph_type} graph: level={self.zoom_levels[graph_type]}")
+        try:
+            self.zoom_levels[graph_type] *= factor
+            if self.zoom_levels[graph_type] < 0.5:
+                self.zoom_levels[graph_type] = 0.5
+            elif self.zoom_levels[graph_type] > 2.0:
+                self.zoom_levels[graph_type] = 2.0
+
+            if graph_type == "bar":
+                if self.bar_canvas is None:
+                    logger.debug("Bar canvas not initialized, skipping zoom")
+                    messagebox.showwarning("Warning", "Bar chart not available for zooming")
+                    return
+                self.bar_canvas.get_tk_widget().destroy()
+                plt.close(self.bar_fig)  # Fixed: Use plt.close()
+                self.bar_canvas, self.bar_fig = self.stats_manager.get_bar_chart(self.bar_frame, color=self.bar_color, zoom=self.zoom_levels["bar"])
+                self.bar_canvas.get_tk_widget().pack(expand=True, fill="both")
+            elif graph_type == "scatter":
+                if self.scatter_canvas is None:
+                    logger.debug("Scatter canvas not initialized, skipping zoom")
+                    messagebox.showwarning("Warning", "Scatter plot not available for zooming")
+                    return
+                self.scatter_canvas.get_tk_widget().destroy()
+                plt.close(self.scatter_fig)  # Fixed: Use plt.close()
+                self.scatter_canvas, self.scatter_fig = self.stats_manager.get_scatter_plot(self.scatter_frame, scatter_color=self.scatter_color, line_color=self.scatter_line_color, zoom=self.zoom_levels["scatter"])
+                self.scatter_canvas.get_tk_widget().pack(expand=True, fill="both")
+            elif graph_type == "line":
+                if self.line_canvas is None:
+                    logger.debug("Line canvas not initialized, skipping zoom")
+                    messagebox.showwarning("Warning", "Line graph not available for zooming")
+                    return
+                self.line_canvas.get_tk_widget().destroy()
+                plt.close(self.line_fig)  # Fixed: Use plt.close()
+                self.line_canvas, self.line_fig = self.stats_manager.get_line_graph(self.line_frame, color=self.line_color, zoom=self.zoom_levels["line"])
+                self.line_canvas.get_tk_widget().pack(expand=True, fill="both")
+            logger.debug(f"Zoomed {graph_type} graph: level={self.zoom_levels[graph_type]}")
+        except Exception as e:
+            logger.error(f"Error zooming {graph_type} graph: {e}")
+            messagebox.showerror("Error", f"Failed to zoom {graph_type} graph: {e}")
+
+    def refresh_line_chart(self):
+     try:
+         if self.line_canvas is not None:
+             self.line_canvas.get_tk_widget().destroy()
+         if self.line_fig is not None:
+             plt.close(self.line_fig)
+         self.line_canvas, self.line_fig = self.stats_manager.get_line_graph(self.line_frame, color=self.line_color, zoom=self.zoom_levels["line"])
+         self.line_canvas.get_tk_widget().pack(expand=True, fill="both")
+         logger.debug("Refreshed line graph")
+     except Exception as e:
+         logger.error(f"Error refreshing line graph: {e}")
+         messagebox.showerror("Error", f"Failed to refresh line graph: {e}")
+
 
     def setup_calendar(self):
         frame = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
@@ -595,33 +731,39 @@ class TransactionGUI:
         self.update_calendar()
 
     def setup_notifications(self):
-        frame = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
-        frame.pack(expand=True, fill="both", padx=20, pady=20)
+        frame = self.tab_frames["Notifications"]
+        for widget in frame.winfo_children():
+            widget.destroy()
 
-        tk.Label(frame, text="Notifications", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
+        tk.Label(frame, text="Notifications", font=("Arial", 16, "bold")).pack(pady=10)
 
         # Upcoming Payments
-        tk.Label(frame, text="Upcoming Payments", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
-        self.notifications_payments = ttk.Treeview(
-            frame, columns=("Amount", "Recipient", "Date", "PaymentMethod"), show="headings", height=5
-        )
+        payments_frame = tk.Frame(frame, bg=self.themes[self.current_theme]["content_bg"])
+        payments_frame.pack(expand=True, fill="both", padx=20, pady=5)
+        tk.Label(payments_frame, text="Upcoming Payments", font=("Arial", 12, "bold")).pack(anchor="w")
+        self.notifications_payments = ttk.Treeview(payments_frame, columns=("Amount", "Recipient", "Date", "Method"), show="headings", height=5)
         self.notifications_payments.heading("Amount", text="Amount")
         self.notifications_payments.heading("Recipient", text="Recipient")
         self.notifications_payments.heading("Date", text="Date")
-        self.notifications_payments.heading("PaymentMethod", text="Payment Method")
-        self.notifications_payments.pack(fill="x", pady=5)
+        self.notifications_payments.heading("Method", text="Method")
+        self.notifications_payments.pack(expand=True, fill="both")
+        for col in ("Amount", "Recipient", "Date", "Method"):
+            self.notifications_payments.column(col, anchor="center", width=100)
 
         # Upcoming Appointments
-        tk.Label(frame, text="Upcoming Appointments", font=("Arial", 12, "bold")).pack(anchor="w", pady=5)
-        self.notifications_appointments = ttk.Treeview(
-            frame, columns=("Title", "Date", "Time"), show="headings", height=5
-        )
+        appointments_frame = tk.Frame(frame, bg=self.themes[self.current_theme]["content_bg"])
+        appointments_frame.pack(expand=True, fill="both", padx=20, pady=5)
+        tk.Label(appointments_frame, text="Upcoming Appointments", font=("Arial", 12, "bold")).pack(anchor="w")
+        self.notifications_appointments = ttk.Treeview(appointments_frame, columns=("Title", "Date", "Time"), show="headings", height=5)
         self.notifications_appointments.heading("Title", text="Title")
         self.notifications_appointments.heading("Date", text="Date")
         self.notifications_appointments.heading("Time", text="Time")
-        self.notifications_appointments.pack(fill="x", pady=5)
+        self.notifications_appointments.pack(expand=True, fill="both")
+        for col in ("Title", "Date", "Time"):
+            self.notifications_appointments.column(col, anchor="center", width=100)
 
         self.update_notifications()
+        logger.debug("Setup notifications tab")
 
     def setup_wallet(self):
         frame = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
@@ -732,57 +874,62 @@ class TransactionGUI:
             logger.info(f"Changed theme to {self.current_theme}")
 
     def update_dashboard(self):
-        transactions = self.transaction_manager.get_transactions()
-        income = sum(t["Amount"] for t in transactions if t["Category"] == "Deposit")
-        expenses = sum(t["Amount"] for t in transactions if t["Category"] in ["Invoice", "Transfer"])
-        net = income - expenses
-        self.balance_value.config(text=f"${net:.2f}")
-        self.summary_label.config(text=f"Income: ${income:.2f} | Expenses: ${expenses:.2f} | Net: ${net:.2f}")
-        logger.debug(f"Summary - Income: {income}, Expenses: {expenses}, Net: {net}")
-
-        for row in self.recent_payments.get_children():
-            self.recent_payments.delete(row)
-        for t in transactions[-3:]:  # Last 3 transactions
-            self.recent_payments.insert("", "end", values=(
-                f"${t['Amount']:.2f}", t["Recipient"], t["Date"]
-            ))
-
-        for widget in self.wallet_preview.winfo_children():
-            widget.destroy()
-        cards = self.wallet_manager.get_cards()
-        for card in cards[:2]:  # Show up to 2 cards
-            tk.Label(self.wallet_preview, text=f"{card['Type']}: {card['Number'][-4:]}", font=("Arial", 10)).pack(anchor="w")
-        logger.debug("Updated dashboard")
-
-    def update_transaction_lists(self, event=None):
         try:
-            category_filter = self.filter_category_var.get()
-            type_filter = self.filter_type_var.get()
-            start_date = self.start_date_var.get().strip()
-            end_date = self.end_date_var.get().strip()
-            recipient = self.recipient_var.get().strip()
-            if not start_date or not end_date:
-                start_date = end_date = None
-            trees = [
-                (self.tree_all, category_filter, type_filter),
-                (self.tree_invoices, "Invoice", None),
-                (self.tree_deposits, "Deposit", None),
-                (self.tree_transfers, "Transfer", None)
-            ]
-            for tree, cat, t_type in trees:
-                for row in tree.get_children():
-                    tree.delete(row)
-                transactions = self.transaction_manager.get_transactions(
-                    category=cat, transaction_type=t_type, start_date=start_date, end_date=end_date, recipient=recipient
-                )
-                for t in transactions:
-                    tree.insert("", "end", values=(
-                        f"${t['Amount']:.2f}", t["Status"], t["Recipient"], t["Date"], t["PaymentMethod"]
-                    ))
+            # Check if Dashboard widgets exist
+            if not all(hasattr(self, attr) and getattr(self, attr).winfo_exists() for attr in ['balance_value', 'summary_label', 'recent_payments', 'wallet_preview']):
+                logger.debug("Dashboard widgets missing, recreating tab")
+                self.tab_frames["Dashboard"].destroy()
+                self.tab_frames["Dashboard"] = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+                self.setup_dashboard()
+
+            transactions = self.transaction_manager.get_transactions()
+            income = sum(t["Amount"] for t in transactions if t["Category"] == "Deposit")
+            expenses = sum(t["Amount"] for t in transactions if t["Category"] in ["Expense", "Invoice"])
+            net = income - expenses
+
+            self.balance_value.config(text=f"${net:.2f}")
+            self.summary_label.config(text=f"Income: ${income:.2f} | Expenses: ${expenses:.2f} | Net: ${net:.2f}")
+
+            # Update recent_payments
+            for row in self.recent_payments.get_children():
+                self.recent_payments.delete(row)
+            for t in transactions[-3:]:  # Last 3 transactions
+                self.recent_payments.insert("", "end", values=(
+                    f"${t['Amount']:.2f}", t["Recipient"], t["Date"]
+                ))
+
+            # Update wallet_preview
+            for widget in self.wallet_preview.winfo_children():
+                widget.destroy()
+            cards = self.wallet_manager.get_cards()
+            for card in cards[:2]:  # Show up to 2 cards
+                tk.Label(self.wallet_preview, text=f"{card['Type']}: {card['Number'][-4:]}", font=("Arial", 10)).pack(anchor="w")
+
+            logger.debug("Updated dashboard")
+        except Exception as e:
+            logger.error(f"Error updating dashboard: {e}")
+            messagebox.showerror("Error", f"Failed to update dashboard: {e}")
+
+    def update_transaction_lists(self):
+        try:
+            # Check if Transactions widget exists
+            if not hasattr(self, 'transactions_list') or not self.transactions_list.winfo_exists():
+                logger.debug("Transactions list widget missing, recreating tab")
+                self.tab_frames["Transactions"].destroy()
+                self.tab_frames["Transactions"] = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+                self.setup_transactions()
+
+            for row in self.transactions_list.get_children():
+                self.transactions_list.delete(row)
+            transactions = self.transaction_manager.get_transactions()
+            for t in transactions:
+                self.transactions_list.insert("", "end", values=(
+                    f"${t['Amount']:.2f}", t["Category"], t["Recipient"], t["Date"], t["PaymentMethod"]
+                ))
             logger.debug("Updated transaction lists")
         except Exception as e:
             logger.error(f"Error updating transaction lists: {e}")
-            messagebox.showerror("Error", str(e))
+            messagebox.showerror("Error", f"Failed to update transaction lists: {e}")
 
     def select_transaction(self, event, frame):
         try:
@@ -822,52 +969,56 @@ class TransactionGUI:
 
     def add_transaction(self):
         try:
-            amount_str = self.entry_amount.get().replace('$', '').strip()  # Remove $ symbol
-            amount = float(amount_str)
-            description = self.entry_description.get()
+            amount = float(self.entry_amount.get())
             category = self.category_var.get()
             recipient = self.entry_recipient.get()
-            payment_method = self.payment_var.get()
-            status = self.status_var.get()
-            self.transaction_manager.add_transaction(
-                description, amount, category, recipient, payment_method, status
-            )
+            date = self.entry_date.get()
+            payment_method = self.payment_method_var.get()
+            self.transaction_manager.add_transaction(amount, category, recipient, date, payment_method)
             self.update_transaction_lists()
+            self.load_account()
             self.update_dashboard()
+            # Ensure the Notifications tab is properly set up before updating
+            if not hasattr(self, 'notifications_payments') or not self.notifications_payments.winfo_exists():
+                self.tab_frames["Notifications"].destroy()
+                self.tab_frames["Notifications"] = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+                self.setup_notifications()
             self.update_notifications()
-            self.update_calendar()
             self.update_stats()
+            self.update_calendar()
+            self.update_wallet()
             messagebox.showinfo("Success", "Transaction added successfully")
-            logger.debug(f"Added transaction: {description}, {amount}, {category}")
+            logger.debug(f"Added transaction: {amount}, {category}, {recipient}, {date}")
         except ValueError as e:
             messagebox.showerror("Error", "Invalid amount format")
             logger.error(f"Error adding transaction: {e}")
-
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to add transaction: {e}")
+            logger.error(f"Error adding transaction: {e}")
+            
     def edit_transaction(self):
         if self.selected_index is None:
             messagebox.showerror("Error", "No transaction selected")
             return
         try:
             amount = float(self.entry_amount.get())
-            transaction = {
-                "Description": self.entry_description.get(),
-                "Amount": amount,
-                "Category": self.category_var.get(),
-                "Recipient": self.entry_recipient.get(),
-                "PaymentMethod": self.payment_var.get(),
-                "Status": self.status_var.get(),
-                "Date": self.transaction_manager.get_transactions()[self.selected_index]["Date"]
-            }
-            self.transaction_manager.edit_transaction(self.selected_index, transaction)
+            description = self.entry_description.get()
+            category = self.category_var.get()
+            recipient = self.entry_recipient.get()
+            payment_method = self.payment_var.get()
+            status = self.status_var.get()
+            self.transaction_manager.edit_transaction(
+                self.selected_index, description, amount, category, recipient, payment_method, status
+            )
             self.update_transaction_lists()
             self.update_dashboard()
             self.update_notifications()
             self.update_calendar()
             self.update_stats()
             messagebox.showinfo("Success", "Transaction updated successfully")
-            logger.debug(f"Edited transaction at index {self.selected_index}: {transaction}")
+            logger.debug(f"Edited transaction at index {self.selected_index}")
         except ValueError as e:
-            messagebox.showerror("Error", "Invalid amount")
+            messagebox.showerror("Error", f"Invalid amount: {e}")
             logger.error(f"Error editing transaction: {e}")
 
     def delete_transaction(self):
@@ -886,155 +1037,138 @@ class TransactionGUI:
 
     def update_calendar(self):
         try:
-            # Initialize Treeview widgets if they don't exist
-            if not hasattr(self, 'payments_tree'):
-                self.payments_tree = ttk.Treeview(
-                    self.payments_frame, columns=("Amount", "Recipient", "Date", "PaymentMethod"), show="headings"
-                )
-                self.payments_tree.heading("Amount", text="Amount")
-                self.payments_tree.heading("Recipient", text="Recipient")
-                self.payments_tree.heading("Date", text="Date")
-                self.payments_tree.heading("PaymentMethod", text="Payment Method")
-                self.payments_tree.pack(expand=True, fill="both", padx=10, pady=5)
-    
-            if not hasattr(self, 'planned_tree'):
-                self.planned_tree = ttk.Treeview(
-                    self.planned_frame, columns=("Amount", "Recipient", "Date", "PaymentMethod"), show="headings"
-                )
-                self.planned_tree.heading("Amount", text="Amount")
-                self.planned_tree.heading("Recipient", text="Recipient")
-                self.planned_tree.heading("Date", text="Date")
-                self.payments_tree.heading("PaymentMethod", text="Payment Method")
-                self.planned_tree.pack(expand=True, fill="both", padx=10, pady=5)
-    
-            if not hasattr(self, 'appt_tree'):
-                self.appt_tree = ttk.Treeview(
-                    self.appointments_frame, columns=("Title", "Date", "Time"), show="headings"
-                )
-                self.appt_tree.heading("Title", text="Title")
-                self.appt_tree.heading("Date", text="Date")
-                self.appt_tree.heading("Time", text="Time")
-                self.appt_tree.pack(expand=True, fill="both", padx=10, pady=5)
-    
-            # Clear existing rows
-            for row in self.payments_tree.get_children():
-                self.payments_tree.delete(row)
-            for row in self.planned_tree.get_children():
-                self.planned_tree.delete(row)
-            for row in self.appt_tree.get_children():
-                self.appt_tree.delete(row)
-    
-            # Populate Payments
-            for t in self.transaction_manager.get_transactions():
-                self.payments_tree.insert("", "end", values=(
-                    f"${t['Amount']:.2f}", t["Recipient"], t["Date"], t["PaymentMethod"]
-                ))
-    
-            # Populate Planned Payments
-            for p in self.calendar_manager.get_planned_payments():
-                self.planned_tree.insert("", "end", values=(
-                    f"${p['Amount']:.2f}", p["Recipient"], p["Date"], p["PaymentMethod"]
-                ))
-    
-            # Populate Appointments
-            for a in self.calendar_manager.get_appointments():
-                self.appt_tree.insert("", "end", values=(a["Title"], a["Date"], a["Time"]))
-    
-            # Ensure form is visible
-            for widget in self.planned_frame.winfo_children():
-                widget.grid_forget()
-            tk.Label(self.planned_frame, text="Add Planned Payment", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
-            self.planned_form.pack(fill="x", padx=10)
-            self.planned_tree.pack(expand=True, fill="both", padx=10, pady=5)
-    
-            for widget in self.appointments_frame.winfo_children():
-                widget.grid_forget()
-            tk.Label(self.appointments_frame, text="Add Appointment", font=("Arial", 14, "bold")).pack(anchor="w", pady=10)
-            self.appointment_form.pack(fill="x", padx=10)
-            self.appt_tree.pack(expand=True, fill="both", padx=10, pady=5)
-    
-            logger.debug("Updated calendar displays")
+            # Check if Calendar widget exists
+            if not hasattr(self, 'calendar') or not self.calendar.winfo_exists():
+                logger.debug("Calendar widget missing, recreating tab")
+                self.tab_frames["Calendar"].destroy()
+                self.tab_frames["Calendar"] = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+                self.setup_calendar()
+
+            self.calendar.delete(1.0, tk.END)
+            payments = self.calendar_manager.get_planned_payments()
+            appointments = self.calendar_manager.get_appointments()
+            self.calendar.insert(tk.END, "Planned Payments:\n")
+            for p in payments:
+                self.calendar.insert(tk.END, f"{p['Date']}: ${p['Amount']:.2f} to {p['Recipient']} via {p['PaymentMethod']}\n")
+            self.calendar.insert(tk.END, "\nAppointments:\n")
+            for a in appointments:
+                self.calendar.insert(tk.END, f"{a['Date']} at {a['Time']}: {a['Title']}\n")
+            logger.debug("Updated calendar")
         except Exception as e:
             logger.error(f"Error updating calendar: {e}")
             messagebox.showerror("Error", f"Failed to update calendar: {e}")
-    
+
     def add_planned_payment(self):
         try:
             amount = float(self.entry_plan_amount.get())
-            payment = {
-                "Amount": amount,
-                "Date": self.entry_plan_date.get(),
-                "Recipient": self.entry_plan_recipient.get(),
-                "PaymentMethod": self.plan_payment_var.get()
-            }
-            self.calendar_manager.add_planned_payment(payment)
+            date = self.entry_plan_date.get()
+            recipient = self.entry_plan_recipient.get()
+            payment_method = self.plan_payment_var.get()
+            self.calendar_manager.add_planned_payment(amount, date, recipient, payment_method)
             self.update_calendar()
             self.update_notifications()
             messagebox.showinfo("Success", "Planned payment added successfully")
-            logger.debug(f"Added planned payment: {payment}")
+            logger.debug(f"Added planned payment: {amount}, {date}, {recipient}, {payment_method}")
         except ValueError as e:
-            messagebox.showerror("Error", "Invalid amount")
+            messagebox.showerror("Error", f"Invalid amount or date: {e}")
             logger.error(f"Error adding planned payment: {e}")
 
     def add_appointment(self):
-        appointment = {
-            "Title": self.entry_appointment_title.get(),
-            "Date": self.entry_appointment_date.get(),
-            "Time": self.entry_appointment_time.get()
-        }
-        self.calendar_manager.add_appointment(appointment)
-        self.update_calendar()
-        self.update_notifications()
-        messagebox.showinfo("Success", "Appointment added successfully")
-        logger.debug(f"Added appointment: {appointment}")
+        try:
+            title = self.entry_appointment_title.get()
+            date = self.entry_appointment_date.get()
+            time = self.entry_appointment_time.get()
+            self.calendar_manager.add_appointment(title, date, time)
+            self.update_calendar()
+            self.update_notifications()
+            messagebox.showinfo("Success", "Appointment added successfully")
+            logger.debug(f"Added appointment: {title}, {date}, {time}")
+        except ValueError as e:
+            messagebox.showerror("Error", f"Invalid date or time: {e}")
+            logger.error(f"Error adding appointment: {e}")
 
     def update_notifications(self):
-        for row in self.notifications_payments.get_children():
-            self.notifications_payments.delete(row)
-        payments = self.calendar_manager.get_planned_payments()
-        logger.debug(f"Retrieved upcoming payments: {len(payments)}")
-        for p in payments:
-            self.notifications_payments.insert("", "end", values=(
-                f"${p['Amount']:.2f}", p["Recipient"], p["Date"], p["PaymentMethod"]
-            ))
+        try:
+            # Check if the Treeview widgets exist and are valid
+            if not hasattr(self, 'notifications_payments') or not self.notifications_payments.winfo_exists():
+                logger.debug("Notifications payments Treeview missing, recreating tab")
+                self.tab_frames["Notifications"].destroy()
+                self.tab_frames["Notifications"] = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+                self.setup_notifications()
 
-        for row in self.notifications_appointments.get_children():
-            self.notifications_appointments.delete(row)
-        appointments = self.calendar_manager.get_appointments()
-        logger.debug(f"Retrieved upcoming appointments: {len(appointments)}")
-        for a in appointments:
-            self.notifications_appointments.insert("", "end", values=(
-                a["Title"], a["Date"], a["Time"]
-            ))
-        logger.debug("Updated notifications")
+            if not hasattr(self, 'notifications_appointments') or not self.notifications_appointments.winfo_exists():
+                logger.debug("Notifications appointments Treeview missing, recreating tab")
+                self.tab_frames["Notifications"].destroy()
+                self.tab_frames["Notifications"] = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+                self.setup_notifications()
+
+            # Clear and update payments
+            for row in self.notifications_payments.get_children():
+                self.notifications_payments.delete(row)
+            payments = self.calendar_manager.get_upcoming_payments()
+            logger.debug(f"Retrieved upcoming payments: {len(payments)}")
+            for p in payments:
+                self.notifications_payments.insert("", "end", values=(
+                    f"${p['Amount']:.2f}", p["Recipient"], p["Date"], p["PaymentMethod"]
+                ))
+
+            # Clear and update appointments
+            for row in self.notifications_appointments.get_children():
+                self.notifications_appointments.delete(row)
+            appointments = self.calendar_manager.get_upcoming_appointments()
+            logger.debug(f"Retrieved upcoming appointments: {len(appointments)}")
+            for a in appointments:
+                self.notifications_appointments.insert("", "end", values=(
+                    a["Title"], a["Date"], a["Time"]
+                ))
+            logger.debug("Updated notifications")
+        except Exception as e:
+            logger.error(f"Error updating notifications: {e}")
+            messagebox.showerror("Error", f"Failed to update notifications: {e}")
 
     def update_wallet(self):
-        for widget in self.card_frame.winfo_children():
-            widget.destroy()
-        cards = self.wallet_manager.get_cards()
-        for card in cards:
-            card_frame = tk.Frame(self.card_frame, bg=self.themes[self.current_theme]["content_bg"])
-            card_frame.pack(fill="x", pady=2)
-            tk.Label(card_frame, text=f"{card['Type']}: {card['Number'][-4:]}", font=("Arial", 10)).pack(side="left")
-            if card.get("Image"):
-                img = Image.open(card["Image"]).resize((50, 30), Image.Resampling.LANCZOS)
-                photo = ImageTk.PhotoImage(img)
-                tk.Label(card_frame, image=photo).pack(side="right")
-                card_frame.image = photo  # Keep reference
-        logger.debug("Updated wallet display")
+        try:
+            # Check if Wallet widget exists
+            if not hasattr(self, 'card_frame') or not self.card_frame.winfo_exists():
+                logger.debug("Card frame widget missing, recreating tab")
+                self.tab_frames["Wallet"].destroy()
+                self.tab_frames["Wallet"] = tk.Frame(self.content, bg=self.themes[self.current_theme]["content_bg"])
+                self.setup_wallet()
+
+            for widget in self.card_frame.winfo_children():
+                widget.destroy()
+            cards = self.wallet_manager.get_cards()
+            for card in cards:
+                card_frame = tk.Frame(self.card_frame, bg=self.themes[self.current_theme]["content_bg"])
+                card_frame.pack(fill="x", pady=2)
+                tk.Label(card_frame, text=f"{card['Type']}: {card['Number'][-4:]}", font=("Arial", 10)).pack(side="left")
+                if card.get("ImagePath"):
+                    try:
+                        img = Image.open(card["ImagePath"]).resize((50, 30), Image.Resampling.LANCZOS)
+                        photo = ImageTk.PhotoImage(img)
+                        tk.Label(card_frame, image=photo).pack(side="right")
+                        card_frame.image = photo  # Keep reference
+                    except Exception as e:
+                        logger.error(f"Error loading card image {card['ImagePath']}: {e}")
+            logger.debug("Updated wallet display")
+        except Exception as e:
+            logger.error(f"Error updating wallet: {e}")
+            messagebox.showerror("Error", f"Failed to update wallet: {e}")
 
     def add_card(self):
-        card = {
-            "Number": self.entry_card_number.get(),
-            "Type": self.card_type_var.get(),
-            "Image": getattr(self, "card_image_path", None)
-        }
-        self.wallet_manager.add_card(card)
-        self.update_wallet()
-        self.load_account()  # Update account tab
-        self.update_dashboard()
-        messagebox.showinfo("Success", "Card added successfully")
-        logger.debug(f"Added card: {card}")
+        try:
+            number = self.entry_card_number.get()
+            card_type = self.card_type_var.get()
+            image_path = getattr(self, "card_image_path", "")
+            self.wallet_manager.add_card(number, card_type, image_path)
+            self.update_wallet()
+            self.load_account()  # Update account tab
+            self.update_dashboard()
+            messagebox.showinfo("Success", "Card added successfully")
+            logger.debug(f"Added card: {card_type}, ending in {number[-4:]}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to add card: {e}")
+            logger.error(f"Error adding card: {e}")
 
     def upload_card_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png *.jpg *.jpeg")])

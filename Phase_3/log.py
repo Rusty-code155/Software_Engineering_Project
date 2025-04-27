@@ -1,5 +1,6 @@
 #Code by Turner Miles Peeples
 import logging
+import json
 from datetime import datetime
 logging.basicConfig(
     level=logging.DEBUG,
@@ -18,6 +19,14 @@ class TransactionManager:
         self.file_path = "transactions.txt"
         logger.debug("TransactionManager initialized")
         
+    def load_transactions(self):
+        try:
+            with open("transactions.json", "r") as f:
+                self.transactions = json.load(f)
+            logger.debug("Loaded transactions from file")
+        except FileNotFoundError:
+            logger.debug("No transaction file found, starting with empty list")
+    
     def validate_transaction(self, description, amount, category):
         """Validate transaction data before adding or editing."""
         if not description:
@@ -31,6 +40,9 @@ class TransactionManager:
 
     def add_transaction(self, description, amount, category):
         """Add a new transaction."""
+        self.transactions.append(transaction)
+        self.save_transactions()
+        logger.info(f"Added transaction: {transaction}")
         try:
             self.validate_transaction(description, amount, category)
             date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -47,6 +59,14 @@ class TransactionManager:
         except Exception as e:
             logger.error(f"Error adding transaction: {e}")
             raise
+        
+    def save_transactions(self):
+        try:
+            with open("transactions.json", "w") as f:
+                json.dump(self.transactions, f)
+            logger.debug("Saved transactions to file")
+        except Exception as e:
+            logger.error(f"Error saving transactions: {e}")
         
     def edit_transaction(self, index, description, amount, category):
         """Edit an existing transaction."""

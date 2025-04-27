@@ -117,12 +117,15 @@ class StatsManager:
                     annot.set_visible(False)
                     canvas.draw_idle()
 
+            # Create canvas *before* connecting events
+            canvas = FigureCanvasTkAgg(fig, master=tk_parent)
+
+            # Now connect the events
             canvas.mpl_connect("button_press_event", on_press)
             canvas.mpl_connect("button_release_event", on_release)
             canvas.mpl_connect("motion_notify_event", on_motion)
             canvas.mpl_connect("motion_notify_event", on_hover)
 
-            canvas = FigureCanvasTkAgg(fig, master=tk_parent)
             logger.debug("Generated bar chart with panning and tooltips")
             return canvas, fig
         except Exception as e:
@@ -207,7 +210,10 @@ class StatsManager:
                     annot.set_visible(False)
                     canvas.draw_idle()
 
+            # Create canvas *before* connecting events
             canvas = FigureCanvasTkAgg(fig, master=tk_parent)
+
+            # Now connect the events
             canvas.mpl_connect("button_press_event", on_press)
             canvas.mpl_connect("button_release_event", on_release)
             canvas.mpl_connect("motion_notify_event", on_motion)
@@ -242,21 +248,21 @@ class StatsManager:
             ax.legend()
             plt.xticks(rotation=45)
             plt.tight_layout()
-
+    
             # Panning setup
             ax.panning = False
             ax.press = None
-
+    
             def on_press(event):
                 if event.inaxes != ax:
                     return
                 ax.panning = True
                 ax.press = event.xdata, event.ydata
-
+    
             def on_release(event):
                 ax.panning = False
                 ax.press = None
-
+    
             def on_motion(event):
                 if not ax.panning or event.inaxes != ax or ax.press is None:
                     return
@@ -268,13 +274,13 @@ class StatsManager:
                 ax.set_xlim(xlim[0] - dx, xlim[1] - dx)
                 ax.set_ylim(ylim[0] - dy, ylim[1] - dy)
                 canvas.draw()
-
+    
             # Tooltip setup
             annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
                                 bbox=dict(boxstyle="round", fc="w"),
                                 arrowprops=dict(arrowstyle="->"))
             annot.set_visible(False)
-
+    
             def on_hover(event):
                 vis = annot.get_visible()
                 if event.inaxes == ax:
@@ -293,13 +299,16 @@ class StatsManager:
                 if vis:
                     annot.set_visible(False)
                     canvas.draw_idle()
-
+    
+            # Create canvas *before* connecting events
             canvas = FigureCanvasTkAgg(fig, master=tk_parent)
+    
+            # Now connect the events
             canvas.mpl_connect("button_press_event", on_press)
             canvas.mpl_connect("button_release_event", on_release)
             canvas.mpl_connect("motion_notify_event", on_motion)
             canvas.mpl_connect("motion_notify_event", on_hover)
-
+    
             logger.debug("Generated line graph with panning and tooltips")
             return canvas, fig
         except Exception as e:
