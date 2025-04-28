@@ -1,8 +1,10 @@
 # Written by: Turner Miles Peeples
 
 import logging
+import matplotlib
+matplotlib.use('TkAgg')  # Ensure TkAgg backend for Tkinter integration
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # Confirm this import
 import numpy as np
 from datetime import datetime
 
@@ -14,8 +16,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class StatsManager:
-    def __init__(self, transactions):
-        self.transactions = transactions
+    def __init__(self, transaction_manager):
+        self.transaction_manager = transaction_manager
+        self.transactions = transaction_manager.get_transactions()  # Initial copy
         self.default_colors = {
             'pie': ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f'],
             'bar': '#3498db',
@@ -26,11 +29,22 @@ class StatsManager:
         logger.debug("StatsManager initialized")
 
     def get_pie_chart(self, tk_parent, colors=None):
+        transactions = self.transaction_manager.get_transactions()
+        if not transactions:
+            logger.warning("No transaction data available for pie chart")
+            fig, ax = plt.subplots()
+            ax.text(0.5, 0.5, "No transaction data available", horizontalalignment='center', verticalalignment='center')
+            ax.set_title("Spending by Category")
+            canvas = FigureCanvasTkAgg(fig, master=tk_parent)
+            logger.debug("Generated placeholder pie chart")
+            return canvas, fig
+    
         try:
             categories = {}
-            for t in self.transactions:
+            for t in transactions:
                 cat = t["Category"]
                 categories[cat] = categories.get(cat, 0) + t["Amount"]
+        
             labels = list(categories.keys())
             sizes = list(categories.values())
             if not sizes:
@@ -46,6 +60,10 @@ class StatsManager:
             raise
 
     def get_bar_chart(self, tk_parent, color=None, zoom=1.0):
+        transactions = self.transaction_manager.get_transactions(category=None, transaction_type=None)
+        if not transactions:
+            logging.warning("No spending data available for bar chart")
+            return None
         try:
             monthly_spending = {}
             for t in self.transactions:
@@ -133,6 +151,10 @@ class StatsManager:
             raise
 
     def get_scatter_plot(self, tk_parent, scatter_color=None, line_color=None, zoom=1.0):
+        transactions = self.transaction_manager.get_transactions(category=None, transaction_type=None)
+        if not transactions:
+            logging.warning("No spending data available for scatter plot")
+            return None
         try:
             dates = []
             amounts = []
@@ -226,6 +248,10 @@ class StatsManager:
             raise
 
     def get_line_graph(self, tk_parent, color=None, zoom=1.0):
+        transactions = self.transaction_manager.get_transactions(category=None, transaction_type=None)
+        if not transactions:
+            logging.warning("No spending data available for line graph")
+            return None
         try:
             daily_spending = {}
             for t in self.transactions:
@@ -248,21 +274,21 @@ class StatsManager:
             ax.legend()
             plt.xticks(rotation=45)
             plt.tight_layout()
-    
+
             # Panning setup
             ax.panning = False
             ax.press = None
-    
+
             def on_press(event):
                 if event.inaxes != ax:
                     return
                 ax.panning = True
                 ax.press = event.xdata, event.ydata
-    
+
             def on_release(event):
                 ax.panning = False
                 ax.press = None
-    
+
             def on_motion(event):
                 if not ax.panning or event.inaxes != ax or ax.press is None:
                     return
@@ -274,13 +300,13 @@ class StatsManager:
                 ax.set_xlim(xlim[0] - dx, xlim[1] - dx)
                 ax.set_ylim(ylim[0] - dy, ylim[1] - dy)
                 canvas.draw()
-    
+
             # Tooltip setup
             annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
                                 bbox=dict(boxstyle="round", fc="w"),
                                 arrowprops=dict(arrowstyle="->"))
             annot.set_visible(False)
-    
+
             def on_hover(event):
                 vis = annot.get_visible()
                 if event.inaxes == ax:
@@ -299,16 +325,16 @@ class StatsManager:
                 if vis:
                     annot.set_visible(False)
                     canvas.draw_idle()
-    
+
             # Create canvas *before* connecting events
             canvas = FigureCanvasTkAgg(fig, master=tk_parent)
-    
+
             # Now connect the events
             canvas.mpl_connect("button_press_event", on_press)
             canvas.mpl_connect("button_release_event", on_release)
             canvas.mpl_connect("motion_notify_event", on_motion)
             canvas.mpl_connect("motion_notify_event", on_hover)
-    
+
             logger.debug("Generated line graph with panning and tooltips")
             return canvas, fig
         except Exception as e:
