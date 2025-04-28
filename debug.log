@@ -5598,3 +5598,70 @@
 2025-04-27 23:26:04,490 - DEBUG - Loaded account details from file
 2025-04-27 23:26:04,507 - DEBUG - No wallet file found, starting with empty list
 2025-04-27 23:26:04,515 - DEBUG - Updated dashboard
+2025-04-27 23:37:12,882 - DEBUG - Starting application
+2025-04-27 23:37:14,186 - DEBUG - Starting TransactionGUI initialization
+2025-04-27 23:37:14,186 - DEBUG - Initializing TransactionManager
+2025-04-27 23:37:14,206 - DEBUG - Loaded data from file
+2025-04-27 23:37:14,206 - DEBUG - Initializing AccountManager
+2025-04-27 23:37:14,227 - DEBUG - Loaded account details
+2025-04-27 23:37:14,227 - DEBUG - Initializing StatsManager
+2025-04-27 23:37:14,227 - DEBUG - Initializing CalendarManager
+2025-04-27 23:37:14,246 - DEBUG - Loaded appointments
+2025-04-27 23:37:14,246 - DEBUG - Initializing WalletManager
+2025-04-27 23:37:14,246 - DEBUG - No wallet file found, starting with empty list
+2025-04-27 23:37:14,246 - DEBUG - Calling setup_gui
+2025-04-27 23:37:14,253 - DEBUG - Starting setup_dashboard
+2025-04-27 23:37:14,257 - DEBUG - Starting update_dashboard
+2025-04-27 23:37:14,257 - DEBUG - Updated dashboard
+2025-04-27 23:37:14,257 - DEBUG - Completed update_dashboard
+2025-04-27 23:37:14,257 - DEBUG - Completed setup_dashboard
+2025-04-27 23:37:14,257 - DEBUG - Completed TransactionGUI initialization
+2025-04-27 23:37:14,257 - DEBUG - Entering mainloop
+2025-04-27 23:37:16,560 - DEBUG - Updated transaction list
+2025-04-27 23:37:19,487 - DEBUG - Updated transaction list
+2025-04-27 23:37:26,280 - DEBUG - Application closed
+2025-04-27 23:41:32,764 - DEBUG - Starting application
+2025-04-27 23:41:32,827 - DEBUG - Starting TransactionGUI initialization
+2025-04-27 23:41:32,827 - DEBUG - Initializing TransactionManager
+2025-04-27 23:41:32,827 - DEBUG - Loaded data from file
+2025-04-27 23:41:32,828 - DEBUG - Initializing AccountManager
+2025-04-27 23:41:32,828 - DEBUG - Loaded account details
+2025-04-27 23:41:32,828 - DEBUG - Initializing StatsManager
+2025-04-27 23:41:32,828 - DEBUG - Initializing CalendarManager
+2025-04-27 23:41:32,828 - DEBUG - Loaded appointments
+2025-04-27 23:41:32,829 - DEBUG - Initializing WalletManager
+2025-04-27 23:41:32,829 - DEBUG - No wallet file found, starting with empty list
+2025-04-27 23:41:32,829 - DEBUG - Calling setup_gui
+2025-04-27 23:41:32,830 - DEBUG - Starting setup_dashboard
+2025-04-27 23:41:32,830 - DEBUG - Starting update_dashboard
+2025-04-27 23:41:32,830 - DEBUG - Updated dashboard
+2025-04-27 23:41:32,830 - DEBUG - Completed update_dashboard
+2025-04-27 23:41:32,830 - DEBUG - Completed setup_dashboard
+2025-04-27 23:41:32,830 - DEBUG - Completed TransactionGUI initialization
+2025-04-27 23:41:32,830 - DEBUG - Entering mainloop
+2025-04-27 23:41:36,689 - DEBUG - Starting setup_dashboard
+2025-04-27 23:41:36,695 - DEBUG - Starting update_dashboard
+2025-04-27 23:41:36,695 - DEBUG - Updated dashboard
+2025-04-27 23:41:36,695 - DEBUG - Completed update_dashboard
+2025-04-27 23:41:36,695 - DEBUG - Completed setup_dashboard
+2025-04-27 23:41:37,125 - DEBUG - Updated transaction list
+2025-04-27 23:41:54,337 - DEBUG - Starting setup_dashboard
+2025-04-27 23:41:54,337 - DEBUG - Starting update_dashboard
+2025-04-27 23:41:54,337 - DEBUG - Updated dashboard
+2025-04-27 23:41:54,337 - DEBUG - Completed update_dashboard
+2025-04-27 23:41:54,337 - DEBUG - Completed setup_dashboard
+2025-04-27 23:42:01,038 - DEBUG - Starting setup_payment
+2025-04-27 23:42:01,038 - DEBUG - Loaded payment methods: ['Credit Card', 'Debit Card', 'Bank Transfer']
+2025-04-27 23:42:01,038 - DEBUG - Completed setup_payment
+2025-04-27 23:42:05,418 - DEBUG - Saved data to file
+2025-04-27 23:42:05,418 - DEBUG - Reassigned transactions from Bank Transfer to Credit Card
+2025-04-27 23:42:05,434 - DEBUG - Saved data to file
+2025-04-27 23:42:05,434 - DEBUG - Removed payment method: Bank Transfer
+2025-04-27 23:42:05,434 - DEBUG - Starting setup_payment
+2025-04-27 23:42:05,449 - DEBUG - Loaded payment methods: ['Credit Card', 'Debit Card']
+2025-04-27 23:42:05,449 - DEBUG - Completed setup_payment
+2025-04-27 23:42:05,455 - DEBUG - Updated transaction list
+2025-04-27 23:42:05,468 - DEBUG - Updated calendar
+2025-04-27 23:42:08,240 - DEBUG - Updated calendar
+2025-04-27 23:42:13,326 - DEBUG - Theme updated to Dark
+2025-04-27 23:42:14,439 - DEBUG - Application closed

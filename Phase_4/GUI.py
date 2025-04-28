@@ -18,14 +18,20 @@ logger = logging.getLogger(__name__)
 
 class TransactionGUI:
     def __init__(self, root):
+        logger.debug("Starting TransactionGUI initialization")
         self.root = root
         self.root.title("Transaction Manager")
         self.root.geometry("800x600")
 
+        logger.debug("Initializing TransactionManager")
         self.transaction_manager = TransactionManager()
+        logger.debug("Initializing AccountManager")
         self.account_manager = AccountManager()
+        logger.debug("Initializing StatsManager")
         self.stats_manager = StatsManager(self.transaction_manager)
+        logger.debug("Initializing CalendarManager")
         self.calendar_manager = CalendarManager()
+        logger.debug("Initializing WalletManager")
         self.wallet_manager = WalletManager()
 
         self.themes = {
@@ -36,7 +42,9 @@ class TransactionGUI:
 
         self.tab_frames = {}
         self.sidebar_buttons = {}
+        logger.debug("Calling setup_gui")
         self.setup_gui()
+        logger.debug("Completed TransactionGUI initialization")
 
     def setup_gui(self):
         self.root.configure(bg=self.themes[self.current_theme]["bg"])
@@ -122,6 +130,7 @@ class TransactionGUI:
             setup_method()
 
     def setup_dashboard(self):
+        logger.debug("Starting setup_dashboard")
         frame = self.tab_frames["Dashboard"]
         for widget in frame.winfo_children():
             widget.destroy()
@@ -156,8 +165,10 @@ class TransactionGUI:
         self.wallet_preview.pack(fill="x", padx=20)
 
         self.update_dashboard()
+        logger.debug("Completed setup_dashboard")
 
     def update_dashboard(self):
+        logger.debug("Starting update_dashboard")
         try:
             transactions = self.transaction_manager.get_transactions()
             income = sum(t["Amount"] for t in transactions if t["Category"] == "Deposit")
@@ -184,6 +195,7 @@ class TransactionGUI:
         except Exception as e:
             logger.error(f"Error updating dashboard: {e}")
             messagebox.showerror("Error", f"Failed to update dashboard: {e}")
+        logger.debug("Completed update_dashboard")
 
     def setup_transactions(self):
         frame = self.tab_frames["Transactions"]
@@ -233,7 +245,11 @@ class TransactionGUI:
 
         tk.Button(form, text="Edit Selected Transaction", command=self.edit_transaction,
                   bg=self.themes[self.current_theme]["button_bg"],
-                  fg=self.themes[self.current_theme]["button_fg"]).grid(row=2, column=2, columnspan=2, pady=5)
+                  fg=self.themes[self.current_theme]["button_fg"]).grid(row=2, column=2, pady=5)
+
+        tk.Button(form, text="Delete Selected Transaction", command=self.delete_transaction,
+                  bg=self.themes[self.current_theme]["button_bg"],
+                  fg=self.themes[self.current_theme]["button_fg"]).grid(row=2, column=3, pady=5)
 
         self.update_transaction_list()
 
@@ -353,6 +369,40 @@ class TransactionGUI:
 
         tk.Button(edit_window, text="Save Changes", command=save_changes).grid(row=4, column=0, columnspan=2, pady=10)
 
+    def delete_transaction(self):
+        selected = self.transaction_list.selection()
+        if not selected:
+            messagebox.showwarning("Warning", "Please select a transaction to delete")
+            return
+
+        item = self.transaction_list.item(selected[0])
+        values = item['values']
+        amount, category, recipient, date = values
+
+        transactions = self.transaction_manager.get_transactions()
+        transaction_index = None
+        for i, t in enumerate(transactions):
+            if (f"${t['Amount']:.2f}" == amount and t['Category'] == category and
+                t['Recipient'] == recipient and t['Date'] == date):
+                transaction_index = i
+                break
+
+        if transaction_index is None:
+            messagebox.showerror("Error", "Transaction not found")
+            return
+
+        try:
+            # Remove the transaction
+            self.transaction_manager.transactions.pop(transaction_index)
+            self.transaction_manager.save_data()
+            self.update_transaction_list()
+            self.update_dashboard()
+            self.update_calendar()
+            messagebox.showinfo("Success", "Transaction deleted successfully")
+        except Exception as e:
+            logger.error(f"Error deleting transaction: {e}")
+            messagebox.showerror("Error", f"Failed to delete transaction: {e}")
+
     def update_transaction_list(self):
         try:
             for row in self.transaction_list.get_children():
@@ -434,6 +484,7 @@ class TransactionGUI:
             messagebox.showerror("Error", f"Failed to update account details: {e}")
 
     def setup_statistics(self):
+        logger.debug("Starting setup_statistics")
         frame = self.tab_frames["Statistics"]
         for widget in frame.winfo_children():
             widget.destroy()
@@ -506,6 +557,7 @@ class TransactionGUI:
             line_label.configure(text="Error generating line graph")
 
         self.update_stats()
+        logger.debug("Completed setup_statistics")
 
     def update_stats(self):
         try:
@@ -896,6 +948,9 @@ class TransactionGUI:
             messagebox.showerror("Error", f"Failed to remove payment method: {e}")
 
 if __name__ == "__main__":
+    logger.debug("Starting application")
     root = tk.Tk()
     app = TransactionGUI(root)
+    logger.debug("Entering mainloop")
     root.mainloop()
+    logger.debug("Application closed")

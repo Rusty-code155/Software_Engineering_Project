@@ -24,7 +24,7 @@
             "Category": "Deposit",
             "Recipient": "me",
             "Date": "2025-04-27 23:23:49",
-            "PaymentMethod": "Bank Transfer",
+            "PaymentMethod": "Credit Card",
             "Status": "Completed"
         },
         {
@@ -33,7 +33,7 @@
             "Category": "Invoice",
             "Recipient": "me",
             "Date": "2025-04-27 23:23:53",
-            "PaymentMethod": "Bank Transfer",
+            "PaymentMethod": "Credit Card",
             "Status": "Completed"
         },
         {
@@ -42,7 +42,7 @@
             "Category": "Expense",
             "Recipient": "me",
             "Date": "2025-04-27 23:24:00",
-            "PaymentMethod": "Bank Transfer",
+            "PaymentMethod": "Credit Card",
             "Status": "Completed"
         },
         {
@@ -57,7 +57,6 @@
     ],
     "payment_methods": [
         "Credit Card",
-        "Debit Card",
-        "Bank Transfer"
+        "Debit Card"
     ]
 }
