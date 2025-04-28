@@ -2,132 +2,122 @@
 
 import json
 import os
-import logging
 from datetime import datetime
+import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler('debug.log'), logging.StreamHandler()]
-)
+# Setup logging
+logging.basicConfig(filename='debug.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class TransactionManager:
     def __init__(self):
         self.transactions = []
-        self.transactions_file = "transactions.json"
-        self.load_transactions()
-        logger.debug("TransactionManager initialized")
+        self.payment_methods = ["Credit Card", "Debit Card", "Bank Transfer"]
+        self.load_data()
 
-    def load_transactions(self):
-        if os.path.exists(self.transactions_file):
-            try:
-                with open(self.transactions_file, 'r') as f:
-                    self.transactions = json.load(f)
-            except (json.JSONDecodeError, IOError):
-                self.transactions = []
-        else:
-            self.transactions = []
-
-    def save_transactions(self):
+    def add_transaction(self, Description, Amount, Category, Recipient, Date, PaymentMethod, Status):
         try:
-            with open(self.transactions_file, 'w') as f:
-                json.dump(self.transactions, f, indent=4)
-        except IOError:
-            pass
+            parsed_date = datetime.strptime(Date, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            try:
+                parsed_date = datetime.strptime(Date, "%Y-%m-%d")
+                Date = parsed_date.strftime("%Y-%m-%d 00:00:00")
+            except ValueError:
+                logger.warning(f"Invalid date format: {Date}. Using current time instead.")
+                Date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    def add_transaction(self, description, amount, category, recipient, payment_method, status):
         transaction = {
-            "Description": description,
-            "Amount": float(amount),
-            "Category": category,
-            "Recipient": recipient,
-            "Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "PaymentMethod": payment_method,
-            "Status": status
+            "Description": Description,
+            "Amount": Amount,
+            "Category": Category,
+            "Recipient": Recipient,
+            "Date": Date,
+            "PaymentMethod": PaymentMethod,
+            "Status": Status
         }
         self.transactions.append(transaction)
-        self.save_transactions()
-        return transaction
+        self.save_data()
+        logger.debug(f"Added transaction: {transaction}")
 
-    def get_transactions(self, category=None, transaction_type=None, start_date=None, end_date=None, recipient=None):
-        """Return a filtered list of transactions."""
-        transactions = self.transactions
+    def get_transactions(self):
+        return self.transactions
 
-        # Filter by category
-        if category and category != "All":
-            transactions = [t for t in transactions if t["Category"] == category]
+    def add_payment_method(self, method):
+        if method and method not in self.payment_methods:
+            self.payment_methods.append(method)
+            self.save_data()
+            logger.debug(f"Added payment method: {method}")
+            return True
+        logger.warning(f"Failed to add payment method: {method} (already exists or invalid)")
+        return False
 
-        # Filter by transaction type (if needed, assuming type is same as category for now)
-        if transaction_type and transaction_type != "All Transactions":
-            transactions = [t for t in transactions if t["Category"] == transaction_type]
+    def remove_payment_method(self, method):
+        if method in self.payment_methods:
+            self.payment_methods.remove(method)
+            self.save_data()
+            logger.debug(f"Removed payment method: {method}")
+            return True
+        logger.warning(f"Failed to remove payment method: {method} (not found)")
+        return False
 
-        # Filter by date range
-        if start_date:
-            try:
-                start = datetime.strptime(start_date, "%Y-%m-%d")
-                transactions = [t for t in transactions if datetime.strptime(t["Date"], "%Y-%m-%d %H:%M:%S") >= start]
-            except ValueError:
-                logger.error(f"Invalid start_date format: {start_date}")
+    def reassign_payment_method(self, old_method, new_method):
+        if old_method not in self.payment_methods or new_method not in self.payment_methods:
+            logger.warning(f"Cannot reassign payment method: {old_method} or {new_method} not found")
+            return False
 
-        if end_date:
-            try:
-                end = datetime.strptime(end_date, "%Y-%m-%d")
-                transactions = [t for t in transactions if datetime.strptime(t["Date"], "%Y-%m-%d %H:%M:%S") <= end]
-            except ValueError:
-                logger.error(f"Invalid end_date format: {end_date}")
+        if old_method == new_method:
+            logger.warning("Old and new payment methods are the same; no reassignment needed")
+            return True
 
-        # Filter by recipient
-        if recipient:
-            transactions = [t for t in transactions if t["Recipient"].lower().find(recipient.lower()) != -1]
-
-        return transactions
-
-    def edit_transaction(self, index, description=None, amount=None, category=None, recipient=None, date=None, payment_method=None, status=None):
-        if 0 <= index < len(self.transactions):
-            updates = {}
-            if description is not None:
-                updates["Description"] = description
-            if amount is not None:
-                updates["Amount"] = float(amount)
-            if category is not None:
-                updates["Category"] = category
-            if recipient is not None:
-                updates["Recipient"] = recipient
-            if date is not None:
-                updates["Date"] = date
-            if payment_method is not None:
-                updates["PaymentMethod"] = payment_method
-            if status is not None:
-                updates["Status"] = status
-            self.transactions[index].update(updates)
-            self.save_transactions()
-            return self.transactions[index]
-        return None
-
-    def delete_transaction(self, index):
-        if 0 <= index < len(self.transactions):
-            deleted = self.transactions.pop(index)
-            self.save_transactions()
-            return deleted
-        return None
-
-    def get_categories(self):
-        return ["Invoice", "Deposit", "Transfer", "Expense"]
+        updated = False
+        for t in self.transactions:
+            if t["PaymentMethod"] == old_method:
+                t["PaymentMethod"] = new_method
+                updated = True
+        if updated:
+            self.save_data()
+            logger.debug(f"Reassigned transactions from {old_method} to {new_method}")
+        return True
 
     def get_payment_methods(self):
-        return ["Credit Card", "Bank Transfer", "Cash"]
+        return self.payment_methods
 
-    def get_transaction_types(self):
-        return ["All Transactions", "Invoice", "Deposit", "Transfer", "Expense", "Payment"]
-
-    def get_summary(self):
+    def save_data(self):
         try:
-            income = sum(t["Amount"] for t in self.transactions if t["Category"] == "Deposit")
-            expenses = sum(t["Amount"] for t in self.transactions if t["Category"] in ["Expense", "Invoice"])
-            net = income - expenses
-            logger.debug(f"Summary - Income: {income}, Expenses: {expenses}, Net: {net}")
-            return {"income": income, "expenses": expenses, "net": net}
+            data = {
+                "transactions": self.transactions,
+                "payment_methods": self.payment_methods
+            }
+            with open('transactions.json', 'w') as f:
+                json.dump(data, f, indent=4)
+            logger.debug("Saved data to file")
         except Exception as e:
-            logger.error(f"Error calculating summary: {e}")
+            logger.error(f"Error saving data: {e}")
             raise
+
+    def load_data(self):
+        try:
+            if os.path.exists('transactions.json'):
+                with open('transactions.json', 'r') as f:
+                    content = f.read().strip()
+                    if not content:
+                        logger.warning("transactions.json is empty, using default values")
+                        self.transactions = []
+                        self.payment_methods = ["Credit Card", "Debit Card", "Bank Transfer"]
+                    else:
+                        data = json.loads(content)
+                        self.transactions = data.get("transactions", [])
+                        self.payment_methods = data.get("payment_methods", ["Credit Card", "Debit Card", "Bank Transfer"])
+                    logger.debug("Loaded data from file")
+            else:
+                self.transactions = []
+                self.payment_methods = ["Credit Card", "Debit Card", "Bank Transfer"]
+                logger.debug("No data file found, starting with default values")
+        except json.JSONDecodeError as e:
+            logger.error(f"Error parsing transactions.json: {e}. File content: {content}")
+            self.transactions = []
+            self.payment_methods = ["Credit Card", "Debit Card", "Bank Transfer"]
+        except Exception as e:
+            logger.error(f"Error loading data: {e}")
+            self.transactions = []
+            self.payment_methods = ["Credit Card", "Debit Card", "Bank Transfer"]
