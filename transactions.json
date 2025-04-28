@@ -1,12 +1,48 @@
 {
     "transactions": [
         {
+            "Description": "Planned payment to me",
+            "Amount": 55.0,
+            "Category": "Expense",
+            "Recipient": "me",
+            "Date": "2025-06-27 00:00:00",
+            "PaymentMethod": "Debit Card",
+            "Status": "Planned"
+        },
+        {
             "Description": "Deposit to me",
-            "Amount": 20.0,
+            "Amount": 25.0,
             "Category": "Deposit",
             "Recipient": "me",
-            "Date": "2025-04-27 23:23:31",
-            "PaymentMethod": "Credit Card",
+            "Date": "2025-04-27 23:49:40",
+            "PaymentMethod": "Debit Card",
+            "Status": "Completed"
+        },
+        {
+            "Description": "Expense to me",
+            "Amount": 20.0,
+            "Category": "Expense",
+            "Recipient": "me",
+            "Date": "2025-04-27 23:24:00",
+            "PaymentMethod": "Debit Card",
+            "Status": "Completed"
+        },
+        {
+            "Description": "Invoice to me",
+            "Amount": 40.0,
+            "Category": "Invoice",
+            "Recipient": "me",
+            "Date": "2025-04-27 23:23:53",
+            "PaymentMethod": "Debit Card",
+            "Status": "Completed"
+        },
+        {
+            "Description": "Deposit to me",
+            "Amount": 40.0,
+            "Category": "Deposit",
+            "Recipient": "me",
+            "Date": "2025-04-27 23:23:49",
+            "PaymentMethod": "Debit Card",
             "Status": "Completed"
         },
         {
@@ -17,46 +53,9 @@
             "Date": "2025-04-27 23:23:40",
             "PaymentMethod": "Debit Card",
             "Status": "Completed"
-        },
-        {
-            "Description": "Deposit to me",
-            "Amount": 40.0,
-            "Category": "Deposit",
-            "Recipient": "me",
-            "Date": "2025-04-27 23:23:49",
-            "PaymentMethod": "Credit Card",
-            "Status": "Completed"
-        },
-        {
-            "Description": "Invoice to me",
-            "Amount": 40.0,
-            "Category": "Invoice",
-            "Recipient": "me",
-            "Date": "2025-04-27 23:23:53",
-            "PaymentMethod": "Credit Card",
-            "Status": "Completed"
-        },
-        {
-            "Description": "Expense to me",
-            "Amount": 20.0,
-            "Category": "Expense",
-            "Recipient": "me",
-            "Date": "2025-04-27 23:24:00",
-            "PaymentMethod": "Credit Card",
-            "Status": "Completed"
-        },
-        {
-            "Description": "Planned payment to me",
-            "Amount": 55.0,
-            "Category": "Expense",
-            "Recipient": "me",
-            "Date": "2025-06-27 00:00:00",
-            "PaymentMethod": "Debit Card",
-            "Status": "Planned"
         }
     ],
     "payment_methods": [
-        "Credit Card",
         "Debit Card"
     ]
 }
